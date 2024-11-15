@@ -15,26 +15,56 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
+class Stats:
+    """
+    Classe pour les statistiques unité
+    """
+    def __init__(self, point_de_vie, prob_attaque, prob_defense, vitesse):
+        self.point_de_vie = point_de_vie
+        self.prob_attaque = prob_attaque
+        self.prob_defense = prob_defense
+        self.vitesse = vitesse
 
+class Equipment:
+    """
+    Classe por arme ou autre
+    """
+    def __init__(self, weapon=None, armor=None, accessory=None):
+        self.weapon = weapon
+        self.armor = armor
+        self.accessory = accessory
+
+    def get_bonus(self):
+        """
+        Prototipe pour ajouter bonus a mettre ici ou directement dans la class Unit (comment pour example la vitesse pour le poisson)
+        """
+        bonus = {"attack": 0, "defense": 0}
+        if self.weapon:
+            bonus["attack"] += self.weapon.get("attack", 0)
+        if self.armor:
+            bonus["defense"] += self.armor.get("defense", 0)
+        if self.accessory:
+            bonus["mana"] += self.accessory.get("mana", 0)
+        return bonus
+    
 class Unit:
     """
     Classe pour représenter une unité.
+    """
+    def __init__(self, x, y, name, team, attaque, attaque_special, defence, stats, image_path=None):
+        self.x = x
+        self.y = y
+        self.name = name
+        self.team = team  # 'player' o 'enemy'
+        self.attaque = attaque
+        self.attaque_special = attaque_special
+        self.defence = defence
+        self.stats = stats
+        self.is_selected = False
+        # pour ajouter image
+        self.image = pygame.image.load(image_path) if image_path else None 
 
-    ...
-    Attributs
-    ---------
-    x : int
-        La position x de l'unité sur la grille.
-    y : int
-        La position y de l'unité sur la grille.
-    health : int
-        La santé de l'unité.
-    attack_power : int
-        La puissance d'attaque de l'unité.
-    team : str
-        L'équipe de l'unité ('player' ou 'enemy').
-    is_selected : bool
-        Si l'unité est sélectionnée ou non.
+    """ pas encore implementè
 
     Méthodes
     --------
@@ -45,30 +75,6 @@ class Unit:
     draw(screen)
         Dessine l'unité sur la grille.
     """
-
-    def __init__(self, x, y, health, attack_power, team):
-        """
-        Construit une unité avec une position, une santé, une puissance d'attaque et une équipe.
-
-        Paramètres
-        ----------
-        x : int
-            La position x de l'unité sur la grille.
-        y : int
-            La position y de l'unité sur la grille.
-        health : int
-            La santé de l'unité.
-        attack_power : int
-            La puissance d'attaque de l'unité.
-        team : str
-            L'équipe de l'unité ('player' ou 'enemy').
-        """
-        self.x = x
-        self.y = y
-        self.health = health
-        self.attack_power = attack_power
-        self.team = team  # 'player' ou 'enemy'
-        self.is_selected = False
 
     def move(self, dx, dy):
         """Déplace l'unité de dx, dy."""
