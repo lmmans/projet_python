@@ -40,11 +40,10 @@ class Game:
         #Génération de la riviere
         self.generateriver=GenerateBlocks(ROWS,COLUMNS,'river')
         self.river_blocks = self.generateriver.create_river()
-        self.bridges=self.generateriver.bridge(self.river_blocks)
 
         #Génération des murs
         self.generatewalls=GenerateBlocks(ROWS,COLUMNS,'wall')
-        self.wall_blocks=self.generatewalls.create_wall2(self.bridges)
+        self.wall_blocks=self.generatewalls.create_wall()
 
         
 
@@ -123,7 +122,7 @@ class Game:
                 rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
                 pygame.draw.rect(self.screen, WHITE, rect, 1)
 
-        for block in self.bridges:
+        for block in self.river_blocks:
             block.draw(self.screen)
 
         for block in self.wall_blocks:
