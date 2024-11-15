@@ -2,10 +2,10 @@ import pygame
 import random
 from unit import *
 
-BLOCKTYPES=['river','empty']
+BLOCKTYPES=['river','wall']
 BLOCKIMAGE={
     'river': pygame.image.load("water.png"),
-    'empty': pygame.image.load("empty.png")
+    'wall': pygame.image.load("wall.png")
 }
 
 class BLOCK:
@@ -16,9 +16,11 @@ class BLOCK:
         self.image = BLOCKIMAGE[block_type]
 
     def draw(self, screen):
-        if self.block_type == 'river':
-            scaled_image = pygame.transform.scale(self.image, (CELL_SIZE,CELL_SIZE))
-            screen.blit(scaled_image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
+        
+        scaled_image = pygame.transform.scale(self.image, (CELL_SIZE,CELL_SIZE))
+        screen.blit(scaled_image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
+        
+
 
 class GenerateBlocks:
     def __init__(self, lignes, colonnes,block_type):
@@ -26,7 +28,7 @@ class GenerateBlocks:
         self.colonnes = colonnes
         self.image = BLOCKIMAGE[block_type]
     
-    def generateriver(self):
+    def _generateriver(self):
         riverpath = []
         riverstart = random.randint(0, self.colonnes - 1)
         colonne = riverstart
@@ -74,7 +76,7 @@ class GenerateBlocks:
         return riverpath
     
     def create_river(self):
-        riverpath = self.generateriver()
+        riverpath = self._generateriver()
         blocks = []
         
         for (ligne, colonne) in riverpath:
@@ -93,6 +95,108 @@ class GenerateBlocks:
                 bridges.remove(clear_water)
 
         return bridges
+    
+
+    
+    def _generatewall(self,blocks,numberofwallswanted):
+        wallcoordinates=[]
+        visited=set(blocks)
+        
+        for i in range(numberofwallswanted-1):
+
+            
+            numberofblocks=random.randint(2,4)
+            wallstart_ligne= random.randint(0, self.lignes - 1)
+            wallstart_colonne = random.randint(0, self.colonnes - 1)
+
+
+            # Securite 1ere et derniere colonnes et 1ere et derniere lgne 
+            if wallstart_colonne == 0 and (wallstart_ligne != 0 and wallstart_ligne != self.lignes - 1):  #Condition Colonne 0
+                directiontaken = random.choice(['right', 'straight'])
+            elif wallstart_colonne == self.colonnes - 1 and (wallstart_ligne != 0 and wallstart_ligne != self.lignes - 1):  # Derniere Colonne
+                directiontaken = random.choice(['left', 'straight'])
+            elif (wallstart_ligne == 0 and wallstart_colonne != 0 and wallstart_colonne != self.colonnes - 1):  #premiereligne
+                directiontaken = random.choice(['left', 'right'])
+            elif (wallstart_ligne == self.lignes - 1 and wallstart_colonne!= 0 and wallstart_colonne!= self.colonnes - 1):  #dernierecolonne
+                directiontaken = random.choice(['left', 'right'])
+
+            #Securite Coins 
+            elif wallstart_ligne == 0 and wallstart_colonne == 0:  
+                directiontaken = 'right'
+            elif wallstart_ligne == 0 and wallstart_colonne == self.colonnes - 1:  
+                directiontaken = 'left'
+            elif wallstart_ligne== self.lignes - 1 and wallstart_colonne == 0: 
+                directiontaken = 'right'
+            elif wallstart_ligne == self.lignes - 1 and wallstart_colonne == self.colonnes - 1: 
+                directiontaken = 'left'
+
+            #Condion générale 
+            else:  
+                directiontaken = random.choice(['left', 'right','straight'])
+
+
+                   
+            for block_index in range(numberofblocks):
+
+                if directiontaken == 'left':
+                    new_col = wallstart_colonne - block_index
+                    if new_col < 0 or (new_col, wallstart_ligne) in visited:
+                        break
+                    wallcoordinates.append((new_col, wallstart_ligne))
+                    visited.add((new_col, wallstart_ligne))
+
+                elif directiontaken == 'right':
+                    new_col = wallstart_colonne + block_index
+                    if new_col >= self.colonnes or (new_col, wallstart_ligne) in visited:
+                        break
+                    wallcoordinates.append((new_col, wallstart_ligne))
+                    visited.add((new_col, wallstart_ligne))
+
+                elif directiontaken == 'straight':
+                    new_row = wallstart_ligne + block_index
+                    if new_row >= self.lignes or (wallstart_colonne, new_row) in visited:
+                        break
+                    wallcoordinates.append((wallstart_colonne, new_row))
+                    visited.add((wallstart_colonne, new_row))
+
+        return wallcoordinates
+    
+    def create_wall(self,blocks):
+        numberofwalls=random.randint(1,3)
+        wallpath= self._generatewall(blocks,numberofwalls)
+        blocks = []
+        
+        for (colonne, ligne) in wallpath:
+            block = BLOCK(colonne, ligne, 'wall')
+            blocks.append(block)
+        print(f"Generated walls: {len(blocks)}")
+        
+        return blocks
+    
+    def create_wall2(self, blocks):
+        number_of_walls = random.randint(1, 3)
+        retries = 30  # Maximum retry attempts
+        wallpath = []
+
+        for _ in range(retries):
+            wallpath = self._generatewall(blocks, number_of_walls)
+            if wallpath:  # If wallpath is not empty, break the loop
+                break
+            print("Retrying wall generation...")
+
+        if not wallpath:
+            print("Failed to generate walls after retries.")
+        else:
+            print(f"Generated {len(wallpath)} walls.")
+
+        wall_blocks = [BLOCK(col, row, 'wall') for (col, row) in wallpath]
+        return wall_blocks
+
+
+
+
+
+
     
     
 
