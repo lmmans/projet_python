@@ -35,6 +35,11 @@ class Game:
 
         self.enemy_units = [Unit(6, 6, 8, 1, 'enemy'),
                             Unit(7, 6, 8, 1, 'enemy')]
+        
+        #Affiche la riviere
+        self.generateriver=GenerateBlocks(ROWS,COLUMNS,'river')
+        self.river_blocks = self.generateriver.create_river()
+        self.bridges=self.generateriver.bridge(self.river_blocks)
 
     def handle_player_turn(self):
         """Tour du joueur"""
@@ -108,12 +113,7 @@ class Game:
                 rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
                 pygame.draw.rect(self.screen, WHITE, rect, 1)
 
-        #Affiche la riviere
-        generateriver=GenerateBlocks(ROWS,COLUMNS,'river')
-        river_blocks = generateriver.create_river()
-        bridges=generateriver.bridge(river_blocks)
-
-        for block in bridges:
+        for block in self.bridges:
             block.draw(self.screen)
 
         # Affiche les unités
