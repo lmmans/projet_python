@@ -2,6 +2,7 @@ import pygame
 import random
 
 from unit import *
+from block import *
 
 
 class Game:
@@ -106,6 +107,14 @@ class Game:
             for y in range(0, HEIGHT, CELL_SIZE):
                 rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
                 pygame.draw.rect(self.screen, WHITE, rect, 1)
+
+        #Affiche la riviere
+        generateriver=GenerateBlocks(ROWS,COLUMNS,'river')
+        river_blocks = generateriver.create_river()
+        bridges=generateriver.bridge(river_blocks)
+
+        for block in bridges:
+            block.draw(self.screen)
 
         # Affiche les unités
         for unit in self.player_units + self.enemy_units:
