@@ -2,7 +2,7 @@ import pygame
 import random
 from unit import *
 
-BLOCKTYPES=['river','wall']
+BLOCKTYPES=['river','wall',"grass"]
 BLOCKIMAGE={
     'river': pygame.image.load("water.png"),
     'wall': pygame.image.load("wall.png")
