@@ -61,16 +61,16 @@ class Statistique:
                 f"Défense: {self.defense}")
 
 #esssay    
-class Unite:
+class Unit:
     def __init__(self, x, y, nom, equipe, statistique):
         self.x = x
         self.y = y
         self.nom = nom
         self.equipe = equipe  # 'joueur' ou 'ennemi'
         self.statistique = statistique
-        self.est_selectionne = False
+        self.is_selected = False
         self.equipement_actuel = None
-        self.inventaire = []
+        self.inventaire = [] #Inventory 
 
     def equiper(self, equipement):
         # Équipe le nouvel équipement
@@ -114,29 +114,33 @@ class Unite:
 
     def draw(self, screen):
         """Affiche l'unité sur l'écran."""
-        color = BLUE if self.team == 'player' else RED
+        color = BLUE if self.equipe == 'player' else RED
         if self.is_selected:
             pygame.draw.rect(screen, GREEN, (self.x * CELL_SIZE,
                              self.y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
         pygame.draw.circle(screen, color, (self.x * CELL_SIZE + CELL_SIZE //
                            2, self.y * CELL_SIZE + CELL_SIZE // 2), CELL_SIZE // 3)
+        
+
+""" 
 
 # Création d'équipements
 epee = Equipement("Epee", bonus_statistiques={"attaque": 8})
 armure = Equipement("Armure", bonus_statistiques={"defense": 5})
 chaussures = Equipement("Chaussures", bonus_statistiques={"vitesse": 2})
 
-"""
---Création d'une unité
+
+#--Création d'une unité
 statistiques = Statistique(50, 15, "Ailes", 4, 10, 5, 7)
-oiseau = Unite(3, 4, "Oiseau", "Joueur", statistique=statistiques)
+oiseau = Unit(3, 4, "Oiseau", "Joueur", statistique=statistiques)
 
 print("Statistiques initiales de l'unité :")
 print(oiseau)
 
---Ajout et équipement d'un équipement
+#--Ajout et équipement d'un équipement
 oiseau.ajouter_equipement(chaussures)
 oiseau.equiper(chaussures)
 
 print("\nStatistiques après avoir équipé l'accessoire :")
 print(oiseau)
+"""
