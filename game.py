@@ -45,6 +45,9 @@ class Game:
         self.generatewalls=GenerateBlocks(ROWS,COLUMNS,'wall')
         self.wall_blocks=self.generatewalls.create_wall()
 
+        #Génération de la pelouse
+        self.generategrass=GenerateBlocks(ROWS,COLUMNS,'grass')
+        self.grass_blocks=self.generategrass.create_grass()
         
 
 
@@ -113,7 +116,9 @@ class Game:
                     self.player_units.remove(target)
 
     def flip_display(self):
-        """Affiche le jeu."""
+        """Affiche le jeu.
+        Change display of game
+        """
 
         # Affiche la grille
         self.screen.fill(BLACK)
@@ -122,11 +127,19 @@ class Game:
                 rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
                 pygame.draw.rect(self.screen, WHITE, rect, 1)
 
+
+
+
         for block in self.river_blocks:
             block.draw(self.screen)
 
         for block in self.wall_blocks:
             block.draw(self.screen)
+
+
+        for grass in self.grass_blocks:
+            grass.draw(self.screen)
+        
 
         # Affiche les unités
         for unit in self.player_units + self.enemy_units:

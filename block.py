@@ -31,7 +31,11 @@ class GenerateBlocks:
     
         self.rivercoordinates=[(2,0),(2,1),(3,0),(3,1),(3,2),(3,3),(4,2),(4,3),(4,4),(4,5)]
         self.wallcoordinates=[(0,5),(1,5),(6,5),(7,5),(6,0),(6,1),(6,2)]
-        self.grasscoordinates=[(0,0),(0,1)]
+        self.grasscoordinates= [(i,j) for i in range(ROWS) for j in range(COLUMNS)]
+        self.grasscoordinates2=[x for x in self.grasscoordinates if x not in set(self.wallcoordinates)]
+        self.grasscoordinatesupdated=[x for x in self.grasscoordinates2 if x not in set(self.rivercoordinates)]
+
+        
 
     
     def create_river(self):
@@ -52,8 +56,13 @@ class GenerateBlocks:
         
         return blocks
     
-    def craete_grass(self):
+    def create_grass(self):
         blocks=[]
+        for (ligne, colonne) in self.grasscoordinatesupdated:
+            block = BLOCK(colonne, ligne, 'grass')
+            blocks.append(block)
+        
+        return blocks
         
     
 
