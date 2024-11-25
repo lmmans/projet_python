@@ -5,7 +5,8 @@ from unit import *
 BLOCKTYPES=['river','wall',"grass"]
 BLOCKIMAGE={
     'river': pygame.image.load("water.png"),
-    'wall': pygame.image.load("wall.png")
+    'wall': pygame.image.load("wall.png"), 
+    'grass': pygame.image.load("grass.png")
 }
 
 class BLOCK:
@@ -30,6 +31,7 @@ class GenerateBlocks:
     
         self.rivercoordinates=[(2,0),(2,1),(3,0),(3,1),(3,2),(3,3),(4,2),(4,3),(4,4),(4,5)]
         self.wallcoordinates=[(0,5),(1,5),(6,5),(7,5),(6,0),(6,1),(6,2)]
+        self.grasscoordinates=[(0,0),(0,1)]
 
     
     def create_river(self):
@@ -49,6 +51,10 @@ class GenerateBlocks:
             blocks.append(block)
         
         return blocks
+    
+    def craete_grass(self):
+        blocks=[]
+        
     
 
 
