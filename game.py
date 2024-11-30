@@ -29,12 +29,16 @@ class Game:
         screen : pygame.Surface
             La surface de la fenêtre du jeu.
         """
+        self.athena_statistique = Statistique(100, 15, "Ailes", 4, 10, 5, 7)
+        self.poseidon_statistique=Statistique(100, 15, "Poisson", 4, 10, 5, 7)
+        self.zeus_statistique=Statistique(100, 15, "Bombe", 4, 10, 5, 7)
+        self.hecate_statistique=Statistique(100, 15, "Bombe", 4, 10, 5, 7)
         self.screen = screen
-        self.player_units = [Unit(0, 0, 10, 2, 'player'),
-                             Unit(1, 0, 10, 2, 'player')]
+        self.player_units = [Unit("Poseidon",0, 0, 10, 2, 'player',self.athena_statistique),
+                             Unit("Athena",1, 0, 10, 2, 'player',self.poseidon_statistique)]
 
-        self.enemy_units = [Unit(6, 6, 8, 1, 'enemy'),
-                            Unit(7, 6, 8, 1, 'enemy')]
+        self.enemy_units = [Unit("Zeus",6, 6, 8, 1, 'enemy',self.zeus_statistique),
+                            Unit("Hecate",7, 6, 8, 1, 'enemy',self.zeus_statistique)]
         
 
         #Génération de la riviere
@@ -49,7 +53,7 @@ class Game:
         self.generategrass=GenerateBlocks(ROWS,COLUMNS,'grass')
         self.grass_blocks=self.generategrass.create_grass()
         
-
+        self.font = pygame.font.SysFont('Arial', 24)
 
 
 
@@ -115,6 +119,27 @@ class Game:
                 if target.health <= 0:
                     self.player_units.remove(target)
 
+
+    def draw_health_as_hearts(self, unit, x_offset, y_offset):
+        max_health = 100  
+        heart_size = 20  
+        num_hearts = 10  
+
+        filled_hearts = (unit.statistique.points_de_vie / max_health) * num_hearts
+        full_hearts = int(filled_hearts)  
+        empty_hearts = num_hearts - full_hearts 
+
+        
+        for i in range(full_hearts):
+            heart_rect = pygame.Rect(x_offset + i * (heart_size + 5), y_offset, heart_size, heart_size)
+            pygame.draw.rect(self.screen, (255, 0, 0), heart_rect)  
+
+        # Dessin des cœurs vides
+        for i in range(full_hearts, num_hearts):
+            heart_rect = pygame.Rect(x_offset + i * (heart_size + 5), y_offset, heart_size, heart_size)
+            pygame.draw.rect(self.screen, (100, 100, 100), heart_rect) 
+
+
     def flip_display(self):
         """Affiche le jeu.
         Change display of game
@@ -145,6 +170,44 @@ class Game:
         for unit in self.player_units + self.enemy_units:
             unit.draw(self.screen)
 
+            
+        panel_rect = pygame.Rect(WIDTH, 0, PANEL_WIDTH, HEIGHT)
+        pygame.draw.rect(self.screen, (50, 50, 50), panel_rect)  
+        pygame.draw.rect(self.screen, WHITE, panel_rect, 2)  
+
+        x_offset=WIDTH + 20
+        y_offset = 20  
+
+        for unit in self.player_units:
+            name_text = self.font.render(f"Name: {unit.nom}", True, WHITE)
+            self.screen.blit(name_text, (x_offset, y_offset)) 
+            y_offset += 30  
+
+            health_text = self.font.render(f"Health: {unit.health}", True, WHITE)
+            self.screen.blit(health_text, (x_offset, y_offset)) 
+            y_offset += 30
+
+            attack_text = self.font.render(f"Attack: {unit.attack_power}", True, WHITE)
+            self.screen.blit(attack_text, (x_offset, y_offset))  
+            y_offset += 30
+            self.draw_health_as_hearts(unit, WIDTH + 20, y_offset)
+            y_offset += 40  
+
+        for enemy in self.enemy_units:
+            name_text = self.font.render(f"Name: {enemy.nom}", True, WHITE)
+            self.screen.blit(name_text, (x_offset, y_offset)) 
+            y_offset += 30  
+
+            health_text = self.font.render(f"Health: {enemy.health}", True, WHITE)
+            self.screen.blit(health_text, (x_offset, y_offset))  
+            y_offset += 30
+
+            attack_text = self.font.render(f"Attack Power: {enemy.attack_power}", True, WHITE)
+            self.screen.blit(attack_text, (x_offset, y_offset)) 
+            y_offset += 30
+            self.draw_health_as_hearts(enemy, WIDTH + 20, y_offset)
+            y_offset += 40  
+
         # Rafraîchit l'écran
         pygame.display.flip()
 
@@ -155,7 +218,7 @@ def main():
     pygame.init()
 
     # Instanciation de la fenêtre
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    screen = pygame.display.set_mode((SCREEN_WIDTH, HEIGHT))
     pygame.display.set_caption("Mon jeu de stratégie")
 
     # Instanciation du jeu
