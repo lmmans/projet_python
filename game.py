@@ -3,22 +3,11 @@ import random
 
 from unit import *
 from block import *
+from oiseau1 import *
+from poisson import *
 
 
 class Game:
-    """
-    Classe pour représenter le jeu.
-
-    ...
-    Attributs
-    ---------
-    screen: pygame.Surface
-        La surface de la fenêtre du jeu.
-    player_units : list[Unit]
-        La liste des unités du joueur.
-    enemy_units : list[Unit]
-        La liste des unités de l'adversaire.
-    """
 
     def __init__(self, screen):
         """
@@ -29,16 +18,12 @@ class Game:
         screen : pygame.Surface
             La surface de la fenêtre du jeu.
         """
-        self.athena_statistique = Statistique(100, 15, "Ailes", 4, 10, 5, 7)
-        self.poseidon_statistique=Statistique(100, 15, "Poisson", 4, 10, 5, 7)
-        self.zeus_statistique=Statistique(100, 15, "Bombe", 4, 10, 5, 7)
-        self.hecate_statistique=Statistique(100, 15, "Bombe", 4, 10, 5, 7)
         self.screen = screen
-        self.player_units = [Unit("Poseidon",0, 0, 10, 2, 'player',self.athena_statistique),
-                             Unit("Athena",1, 0, 10, 2, 'player',self.poseidon_statistique)]
+        self.player_units = [Oiseau(0, 0, 4,"Athena", 10, 2, 5, 'player', 3,0),
+                             Poisson(1, 0, 1,"Poseidon", 10, 8, 5, 'player', 3,0)]
 
-        self.enemy_units = [Unit("Zeus",6, 6, 8, 1, 'enemy',self.zeus_statistique),
-                            Unit("Hecate",7, 6, 8, 1, 'enemy',self.zeus_statistique)]
+        self.enemy_units = [Defender(6, 6, 4,"b", 20, 8, 5, 'enemy', 1,0),
+                            Assasin(7, 6, 4,"b", 20, 8, 5, 'enemy', 1,0)]
         
 
         #Génération de la riviere
@@ -55,11 +40,14 @@ class Game:
         
         self.font = pygame.font.SysFont('Arial', 24)
 
-
-
     def handle_player_turn(self):
         """Tour du joueur"""
         for selected_unit in self.player_units:
+            if selected_unit.nom == "Athena":
+                ###essaier de le faire bouger 2 pas a la fois
+                selected_unit.vitesse = 4 
+            if selected_unit.nom == "Poseidon":
+                selected_unit.vitesse = 3
 
             # Tant que l'unité n'a pas terminé son tour
             has_acted = False
@@ -89,19 +77,34 @@ class Game:
                         elif event.key == pygame.K_DOWN:
                             dy = 1
 
-                        selected_unit.move(dx, dy)
-                        self.flip_display()
+                        if selected_unit.vitesse > 0:
+                            selected_unit.move(dx, dy)
+                            self.flip_display()
 
-                        # Attaque (touche espace) met fin au tour
-                        if event.key == pygame.K_SPACE:
+                    #attaques
+                        if event.key == pygame.K_a:
                             for enemy in self.enemy_units:
-                                if abs(selected_unit.x - enemy.x) <= 1 and abs(selected_unit.y - enemy.y) <= 1:
-                                    selected_unit.attack(enemy)
+                                # Controlla se il nemico è entro il raggio di attacco
+                                if abs(selected_unit.x - enemy.x) <= selected_unit.distance_attack and abs(selected_unit.y - enemy.y) <= selected_unit.distance_attack:
+                                    selected_unit.attack1(enemy)
                                     if enemy.health <= 0:
                                         self.enemy_units.remove(enemy)
 
                             has_acted = True
                             selected_unit.is_selected = False
+                                    # Mostra opzioni d'attacco
+                                    
+                        elif event.key == pygame.K_s:
+                            pass
+                            #selected_unit.attack2(enemy)  # Esegue il secondo tipo di attacco
+                        elif event.key == pygame.K_d:
+                            pass
+                            #selected_unit.attack3(enemy)  # Esegue il terzo tipo di attacco
+
+                        if event.key == pygame.K_SPACE:
+                            has_acted = True
+                            selected_unit.is_selected = False
+
 
     def handle_enemy_turn(self):
         """IA très simple pour les ennemis."""
@@ -114,8 +117,8 @@ class Game:
             enemy.move(dx, dy)
 
             # Attaque si possible
-            if abs(enemy.x - target.x) <= 1 and abs(enemy.y - target.y) <= 1:
-                enemy.attack(target)
+            if abs(enemy.x - target.x) <= enemy.distance_attack and abs(enemy.y - target.y) <= enemy.distance_attack:
+                enemy.attack1(target)
                 if target.health <= 0:
                     self.player_units.remove(target)
 
@@ -187,7 +190,7 @@ class Game:
             self.screen.blit(health_text, (x_offset, y_offset)) 
             y_offset += 30
 
-            attack_text = self.font.render(f"Attack: {unit.attack_power}", True, WHITE)
+            attack_text = self.font.render(f"Attack: {unit.attack_power_base}", True, WHITE)
             self.screen.blit(attack_text, (x_offset, y_offset))  
             y_offset += 30
             self.draw_health_as_hearts(unit, WIDTH + 20, y_offset)
