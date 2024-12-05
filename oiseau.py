@@ -1,7 +1,7 @@
 import pygame
 import random
 
-from Unit import *
+from unit import *
 from block import *
 
 class Oiseau(Unit):
