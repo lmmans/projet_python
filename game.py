@@ -128,7 +128,7 @@ class Game:
         heart_size = 20  
         num_hearts = 10  
 
-        filled_hearts = (unit.statistique.points_de_vie / max_health) * num_hearts
+        filled_hearts = (unit.health / max_health) * num_hearts
         full_hearts = int(filled_hearts)  
         empty_hearts = num_hearts - full_hearts 
 
@@ -205,7 +205,7 @@ class Game:
             self.screen.blit(health_text, (x_offset, y_offset))  
             y_offset += 30
 
-            attack_text = self.font.render(f"Attack Power: {enemy.attack_power}", True, WHITE)
+            attack_text = self.font.render(f"Attack Power: {enemy.attack_power_base}", True, WHITE)
             self.screen.blit(attack_text, (x_offset, y_offset)) 
             y_offset += 30
             self.draw_health_as_hearts(enemy, WIDTH + 20, y_offset)
@@ -213,6 +213,125 @@ class Game:
 
         # Rafraîchit l'écran
         pygame.display.flip()
+
+    def Page_acceuil(self,screen):
+        background_image = pygame.image.load("background.png")  
+        background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, HEIGHT))
+        title= pygame.font.SysFont('Optima ', 72)
+        buttons = pygame.font.SysFont('Optima', 36)
+           # Text
+        title_text = title.render("Wrath of the Gods", True, WHITE)
+        start_text = buttons.render("Commencer", True, BLACK)
+        quit_text = buttons.render("Quitter", True, BLACK)
+        characters_text=buttons.render("Personnages", True, BLACK)
+           # Buttons
+        start_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, HEIGHT // 4, 200, 50)
+        quit_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, HEIGHT // 4 + 80, 200, 50)
+        characters_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, HEIGHT // 4 + 160, 200, 50)
+
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  
+                    if start_button.collidepoint(event.pos):
+                        running = False  
+                    elif quit_button.collidepoint(event.pos):
+                        pygame.quit()
+                        exit()
+                    elif characters_button.collidepoint(event.pos):
+                        self.show_characters_page(screen) 
+            
+            screen.blit(background_image, (0, 0))
+            
+
+            
+            screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, 100))
+
+          
+            pygame.draw.rect(screen, WHITE, start_button)
+            pygame.draw.rect(screen, WHITE, quit_button)
+            pygame.draw.rect(screen, WHITE, characters_button)
+
+            
+            screen.blit(start_text, (start_button.x + start_button.width // 2 - start_text.get_width() // 2, start_button.y + 10))
+            screen.blit(quit_text, (quit_button.x + quit_button.width // 2 - quit_text.get_width() // 2, quit_button.y + 10))
+            screen.blit(characters_text, (characters_button.x + characters_button.width // 2 - characters_text.get_width() // 2, characters_button.y + 10))
+            
+            pygame.display.flip()
+   
+    def show_characters_page(self, screen):
+        running = True
+        background_image = pygame.image.load("background.png")  
+        background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, HEIGHT))
+        font = pygame.font.SysFont('Optima', 36)
+        subtitle=pygame.font.SysFont('Optima', 20)
+        
+    
+        character_text = font.render("Characters Page", True, WHITE)
+        subtitle_text=subtitle.render("Press on Character to view information",True,WHITE)
+        back_text = font.render("Back", True, BLACK)
+
+        
+        back_button = pygame.Rect(SCREEN_WIDTH - 200 - 20, 20, 200, 50)
+
+        
+        character_size = (150, 150)  
+        characters = [
+            {"image": pygame.image.load("ATHENA.jpeg"), "name": "Athena", "health": 100, "attack": 50, "defense": 30, "rect": pygame.Rect(100, 200, *character_size)},
+            {"image": pygame.image.load("poseidon.jpeg"), "name": "Poseidon", "health": 120, "attack": 40, "defense": 40, "rect": pygame.Rect(270, 200, *character_size)},
+            {"image": pygame.image.load("zeus.jpeg"), "name": "Zeus", "health": 90, "attack": 70, "defense": 20, "rect": pygame.Rect(440, 200, *character_size)},
+            {"image": pygame.image.load("hecate.png"), "name": "Hecate", "health": 90, "attack": 70, "defense": 20, "rect": pygame.Rect(610, 200, *character_size)}
+        ]
+        
+        
+        character_info_rect = pygame.Rect(SCREEN_WIDTH // 2 - 200, HEIGHT // 2 - 50, 400, 200)
+        current_character_info = None
+
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    # Check if a character image is clicked
+                    for character in characters:
+                        if character["rect"].collidepoint(event.pos):
+                            # Show character info when image is clicked
+                            current_character_info = character
+
+                    # Check if back button is clicked
+                    if back_button.collidepoint(event.pos):
+                        running = False  # Return to the main menu
+
+            screen.blit(background_image, (0, 0))
+
+            
+            screen.blit(character_text,(SCREEN_WIDTH // 2 - character_text.get_width() // 2, 100))
+            screen.blit(subtitle_text,(SCREEN_WIDTH // 2 - subtitle_text.get_width() // 2, 150))
+            
+            # Draw the character images
+            for character in characters:
+                character_image = pygame.transform.scale(character["image"], character_size)
+                screen.blit(character_image, character["rect"])
+
+            # Draw the back button
+            pygame.draw.rect(screen, WHITE, back_button)
+            screen.blit(back_text, (back_button.x + back_button.width // 2 - back_text.get_width() // 2, back_button.y + 10))
+
+            if current_character_info:
+                pygame.draw.rect(screen, (20, 20, 20), character_info_rect)
+                character_info = f"Name: {current_character_info['name']}\nHealth: {current_character_info['health']}\nAttack: {current_character_info['attack']}\nDefense: {current_character_info['defense']}"
+                lines = character_info.split("\n")
+                y_offset = character_info_rect.top + 20
+                for line in lines:
+                    info_text = font.render(line, True, WHITE)
+                    screen.blit(info_text, (character_info_rect.left + 20, y_offset))
+                    y_offset += 30
+
+            pygame.display.flip()
 
 
 def main():
@@ -226,6 +345,7 @@ def main():
 
     # Instanciation du jeu
     game = Game(screen)
+    game.Page_acceuil(screen)
 
     # Boucle principale du jeu
     while True:
