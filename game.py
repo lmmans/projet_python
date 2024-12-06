@@ -52,6 +52,8 @@ class Game:
                 selected_unit.vitesse = 4 
             if selected_unit.nom == "Poseidon":
                 selected_unit.vitesse = 3
+            if selected_unit.nom=="Zeus":
+                selected_unit.vitesse=5
 
             # Tant que l'unité n'a pas terminé son tour
             has_acted = False
@@ -164,6 +166,38 @@ class Game:
             heart_rect = pygame.Rect(x_offset + i * (heart_size + 5), y_offset, heart_size, heart_size)
             pygame.draw.rect(self.screen, (100, 100, 100), heart_rect) 
 
+    def is_enemy_visible(self):
+        
+        visible=[]
+        for player in self.player_units:
+            if 0 <= player.x <= 4 and 0 <= player.y <= 5:
+                square_min_x, square_max_x = 0, 4
+                square_min_y, square_max_y = 0, 5
+            elif 6 <= player.x <= 14 and 0 <= player.y <= 10:
+                square_min_x, square_max_x = 6, 14
+                square_min_y, square_max_y = 0, 10
+            elif 0 <= player.x <= 5 and 7 <= player.y <= 14:
+                square_min_x, square_max_x = 0, 5
+                square_min_y, square_max_y = 7, 14
+            elif 5 <= player.x <= 14 and 10 <= player.y <= 14:
+                square_min_x, square_max_x = 5, 14
+                square_min_y, square_max_y = 10, 14
+            elif player.x==5 and  2 <= player.y <= 5:
+                square_min_x, square_max_x = 0, 14
+                square_min_y, square_max_y = 2, 5
+            elif player.y==6 and 3<=player.x<=4:
+                square_min_x, square_max_x = 3, 4
+                square_min_y, square_max_y = 0, 14
+
+            else: 
+                square_max_x,square_min_x=14,0
+                square_max_y,square_min_y=14,0
+            for enemy in self.enemy_units:
+                if square_min_x <= enemy.x <= square_max_x and square_min_y <= enemy.y <= square_max_y:
+                    visible.append(True) # Enemy is visible
+                else:
+                    visible.append(False) # Enemy is outside the square
+        return visible
 
     def flip_display(self):
         """Affiche le jeu.
@@ -177,9 +211,6 @@ class Game:
                 rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
                 pygame.draw.rect(self.screen, WHITE, rect, 1)
 
-
-
-
         for block in self.river_blocks:
             block.draw(self.screen)
 
@@ -192,8 +223,16 @@ class Game:
         
 
         # Affiche les unités
-        for unit in self.player_units + self.enemy_units:
+        for unit in self.player_units:
             unit.draw(self.screen)
+
+        visible = self.is_enemy_visible()
+        enemy_count = len(self.enemy_units)
+        for i, enemy_visibility in enumerate(visible):
+            enemy_index = i % enemy_count  
+            unit = self.enemy_units[enemy_index]
+            if enemy_visibility:
+                unit.draw(self.screen)
 
             
         panel_rect = pygame.Rect(WIDTH, 0, PANEL_WIDTH, HEIGHT)
