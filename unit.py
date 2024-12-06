@@ -48,12 +48,17 @@ class Unit(Position):
 
     def draw(self, screen):
         """Affiche l'unité sur l'écran."""
-        color = BLUE if self.team == 'player' else RED
-        if self.is_selected:
-            pygame.draw.rect(screen, GREEN, (self.x * CELL_SIZE,
-                             self.y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
-        pygame.draw.circle(screen, color, (self.x * CELL_SIZE + CELL_SIZE //
-                           2, self.y * CELL_SIZE + CELL_SIZE // 2), CELL_SIZE // 3)
+        if self.nom=="Athena":
+            photo=pygame.image.load("ATHENA.jpeg")
+        elif self.nom=="Poseidon":
+            photo=photo=pygame.image.load("poseidon.jpeg")
+        elif self.nom=="Zeus":
+            photo=pygame.image.load("zeus.jpeg")
+        elif self.nom=="Hecate":
+            photo=pygame.image.load("hecate.png")
+
+        scaled_image = pygame.transform.scale(photo, (CELL_SIZE,CELL_SIZE))
+        screen.blit(scaled_image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
 
 ### Class pour chaque personnage
 

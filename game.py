@@ -19,11 +19,11 @@ class Game:
             La surface de la fenêtre du jeu.
         """
         self.screen = screen
-        self.player_units = [Oiseau(0, 0, 4,"Athena", 10, 2, 5, 'player', 3,0),
-                             Poisson(1, 0, 1,"Poseidon", 10, 8, 5, 'player', 3,0)]
+        self.player_units = [Oiseau(0, 0, 4,"Athena", 80, 2, 5, 'player', 3,0),
+                             Poisson(1, 0, 1,"Poseidon", 80, 8, 5, 'player', 3,0)]
 
-        self.enemy_units = [Defender(6, 6, 4,"b", 20, 8, 5, 'enemy', 1,0),
-                            Assasin(7, 6, 4,"b", 20, 8, 5, 'enemy', 1,0)]
+        self.enemy_units = [Defender(6, 6, 4,"Zeus", 100, 8, 5, 'enemy', 1,0),
+                            Assasin(7, 6, 4,"Hecate", 100, 8, 5, 'enemy', 1,0)]
         
 
         #Génération de la riviere
@@ -225,9 +225,9 @@ class Game:
         quit_text = buttons.render("Quitter", True, BLACK)
         characters_text=buttons.render("Personnages", True, BLACK)
            # Buttons
-        start_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, HEIGHT // 4, 200, 50)
-        quit_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, HEIGHT // 4 + 80, 200, 50)
-        characters_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, HEIGHT // 4 + 160, 200, 50)
+        start_button = pygame.Rect(SCREEN_WIDTH // 2-(200//2), HEIGHT // 2-100, 200, 50)
+        quit_button = pygame.Rect(SCREEN_WIDTH // 2-(200-350) ,HEIGHT // 2-100, 200, 50)
+        characters_button = pygame.Rect(SCREEN_WIDTH // 2-(200+150), HEIGHT // 2-100, 200, 50)
 
         running = True
         while running:
@@ -248,7 +248,7 @@ class Game:
             
 
             
-            screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, 100))
+            screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, 75))
 
           
             pygame.draw.rect(screen, WHITE, start_button)
@@ -280,14 +280,14 @@ class Game:
         
         character_size = (150, 150)  
         characters = [
-            {"image": pygame.image.load("ATHENA.jpeg"), "name": "Athena", "health": 100, "attack": 50, "defense": 30, "rect": pygame.Rect(100, 200, *character_size)},
-            {"image": pygame.image.load("poseidon.jpeg"), "name": "Poseidon", "health": 120, "attack": 40, "defense": 40, "rect": pygame.Rect(270, 200, *character_size)},
-            {"image": pygame.image.load("zeus.jpeg"), "name": "Zeus", "health": 90, "attack": 70, "defense": 20, "rect": pygame.Rect(440, 200, *character_size)},
-            {"image": pygame.image.load("hecate.png"), "name": "Hecate", "health": 90, "attack": 70, "defense": 20, "rect": pygame.Rect(610, 200, *character_size)}
+            {"image": pygame.image.load("ATHENA.jpeg"), "name": "Athena", "health": 100, "attack": 50, "defense": 30, "rect": pygame.Rect(100, 150, *character_size)},
+            {"image": pygame.image.load("poseidon.jpeg"), "name": "Poseidon", "health": 120, "attack": 40, "defense": 40, "rect": pygame.Rect(270, 150, *character_size)},
+            {"image": pygame.image.load("zeus.jpeg"), "name": "Zeus", "health": 90, "attack": 70, "defense": 20, "rect": pygame.Rect(440, 150, *character_size)},
+            {"image": pygame.image.load("hecate.png"), "name": "Hecate", "health": 90, "attack": 70, "defense": 20, "rect": pygame.Rect(610, 150, *character_size)}
         ]
         
         
-        character_info_rect = pygame.Rect(SCREEN_WIDTH // 2 - 200, HEIGHT // 2 - 50, 400, 200)
+        character_info_rect = pygame.Rect(SCREEN_WIDTH // 2 - 200, HEIGHT // 2, 400, 200)
         current_character_info = None
 
         while running:
@@ -309,8 +309,8 @@ class Game:
             screen.blit(background_image, (0, 0))
 
             
-            screen.blit(character_text,(SCREEN_WIDTH // 2 - character_text.get_width() // 2, 100))
-            screen.blit(subtitle_text,(SCREEN_WIDTH // 2 - subtitle_text.get_width() // 2, 150))
+            screen.blit(character_text,(SCREEN_WIDTH // 2 - character_text.get_width() // 2, 75))
+            screen.blit(subtitle_text,(SCREEN_WIDTH // 2 - subtitle_text.get_width() // 2, 120))
             
             # Draw the character images
             for character in characters:
