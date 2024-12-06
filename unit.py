@@ -2,6 +2,10 @@ import pygame
 import random
 from block import *
 
+SQUARE1X,SQUARE1Y=0,5
+SQUARE2X,SQUARE1Y=5,0
+
+
 ### Pour gener les mouvement ( par default personne peut aller dans les WALL et RIVER)
 class Position:
     def __init__(self, x, y, vitesse):
@@ -44,7 +48,6 @@ class Unit(Position):
         degas = max(attack_minimum, a - target.defence)
         #if abs(self.x - target.x) <= self.distance_attack and abs(self.y - target.y) <= self.distance_attack:
         target.health -= degas
-        
 
     def draw(self, screen):
         """Affiche l'unité sur l'écran."""
