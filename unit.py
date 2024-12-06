@@ -21,7 +21,7 @@ class Position:
                 self.vitesse -= 1  # Réduit la vitesse après chaque mouvement
 
 class Unit(Position):
-    def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack):
+    def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage):
         Position.__init__(self, x, y, vitesse)
         self.nom = nom
         self.health = health
@@ -30,11 +30,12 @@ class Unit(Position):
         self.team = team  # 'player' ou 'enemy'
         self.is_selected = False
         self.distance_attack = distance_attack
+        self.additional_damage = additional_damage
     
     
     def attack_1(self):
-        self.degas = self.attack_power_base 
-        return self.degas        
+        degas = self.attack_power_base 
+        return degas        
    
 ### Si attack < defence enemy au moins lui font 1 dega
     def attack1(self, target):

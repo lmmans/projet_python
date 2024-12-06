@@ -5,8 +5,8 @@ from unit import *
 from block import *
 
 class Poisson(Unit):
-    def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack):
-        Unit.__init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack)
+    def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage):
+        Unit.__init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage)
         self.bonus_attack = 3
         self.bonus_applied = False  # Flag per bonus
 

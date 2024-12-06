@@ -21,13 +21,13 @@ class Game:
             La surface de la fenêtre du jeu.
         """
         self.screen = screen
-        self.player_units = [Oiseau(0, 0, 4,"Athena", 80, 2, 5, 'player', 3),
-                             Poisson(1, 0, 1,"Poseidon", 80, 8, 5, 'player', 3),
-                             Defender(2, 0, 4,"Zeus", 80, 1, 5, 'enemy', 2)
+        self.player_units = [Oiseau(0, 0, 4,"Athena", 80, 2, 5, 'player', 3, 0),
+                             Poisson(1, 0, 1,"Poseidon", 80, 8, 5, 'player', 3, 0),
+                             Defender(2, 0, 4,"Hecate", 80, 1, 5, 'enemy', 2, 0)
                              ]
 
-        self.enemy_units = [Defender(6, 6, 4,"Zeus", 100, 8, 5, 'enemy', 1),
-                            Assasin(7, 6, 4,"Hecate", 100, 8, 5, 'enemy', 1)]
+        self.enemy_units = [Defender(6, 6, 4,"Hecate", 100, 8, 5, 'enemy', 1, 0),
+                            Assasin(7, 6, 4,"Zeus", 100, 8, 5, 'enemy', 1, 0)]
         
 
         #Génération de la riviere
@@ -109,8 +109,6 @@ class Game:
                             has_acted = True
                             selected_unit.is_selected = False
 
-                            has_acted = True
-                            selected_unit.is_selected = False
                             #selected_unit.attack2(enemy)  # Esegue il secondo tipo di attacco
                         elif event.key == pygame.K_d:
                             for unit in (self.player_units):
@@ -124,10 +122,25 @@ class Game:
                             has_acted = True
                             selected_unit.is_selected = False
                             #selected_unit.attack3(enemy)  # Esegue il terzo tipo di attacco
+                        
+                        if event.key == pygame.K_f:
+                            for enemy in self.enemy_units:
+                                # Controlla se il nemico è entro il raggio di attacco
+                                if abs(selected_unit.x - enemy.x) <= selected_unit.distance_attack and abs(selected_unit.y - enemy.y) <= selected_unit.distance_attack:
+                                    selected_unit.attack4(enemy)
+                                    if enemy.health <= 0:
+                                        self.enemy_units.remove(enemy)
+
+                            has_acted = True
+                            selected_unit.is_selected = False
 
                         if event.key == pygame.K_SPACE:
                             has_acted = True
                             selected_unit.is_selected = False
+
+        ### encor a implementer
+                        #for enemy in self.enemy_units:
+                            #enemy.health -= enemy.additional_damage
 
 
     def handle_enemy_turn(self):
