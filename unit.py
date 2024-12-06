@@ -21,7 +21,7 @@ class Position:
                 self.vitesse -= 1  # Réduit la vitesse après chaque mouvement
 
 class Unit(Position):
-    def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, degas):
+    def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack):
         Position.__init__(self, x, y, vitesse)
         self.nom = nom
         self.health = health
@@ -30,7 +30,6 @@ class Unit(Position):
         self.team = team  # 'player' ou 'enemy'
         self.is_selected = False
         self.distance_attack = distance_attack
-        self.degas = degas
     
     
     def attack_1(self):
@@ -60,15 +59,4 @@ class Unit(Position):
         scaled_image = pygame.transform.scale(photo, (CELL_SIZE,CELL_SIZE))
         screen.blit(scaled_image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
 
-### Class pour chaque personnage
 
-
-
-### class defender et assassin cree mais je n'ai pas encor fait les attack
-class Defender(Unit):
-    def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, degas):
-        Unit.__init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, degas)
-
-class Assasin(Unit):
-    def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, degas):
-        Unit.__init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, degas)

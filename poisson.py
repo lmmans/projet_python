@@ -5,8 +5,8 @@ from unit import *
 from block import *
 
 class Poisson(Unit):
-    def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, degas):
-        Unit.__init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, degas)
+    def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack):
+        Unit.__init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack)
         self.bonus_attack = 3
         self.bonus_applied = False  # Flag per bonus
 
@@ -20,6 +20,26 @@ class Poisson(Unit):
                     self.x = new_x
                     self.y = new_y
                     self.vitesse -= 1  # Réduit la vitesse après chaque mouvement
-### meme chose avec lui dans RIVER
-                    if (new_x, new_y) in RIVER:
-                       self.attack_power_base +=3
+
+    def attack_ocean(self):
+            degas = self.attack_power_base *4
+            return degas
+    
+    def attack_normal(self):
+         degas = self.attack_power_base
+         return degas
+    
+    def attack1(self, target):
+        attack_minimum = 1
+        if (self.x, self.y) not in RIVER:
+            #attack_minimum = 1
+            attack = self.attack_normal()
+            degas = max(attack_minimum, attack - target.defence)
+            target.health -= degas
+        elif (self.x, self.y) in RIVER: #aumentation attack temporarire
+            attack = self.attack_ocean()
+            degas = max(attack_minimum, attack - target.defence)
+            target.health -= degas
+
+    def attack2(self):
+        pass
