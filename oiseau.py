@@ -9,7 +9,13 @@ class Oiseau(Unit):
         Unit.__init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage)
         self.bonus_attack = 3
         self.bonus_applied = False  # Flag per bonus
+        
         self.photo=pygame.image.load("ATHENA.jpeg")    
+
+        self.attack1_name = "Wing Storm"
+        self.attack2_name = "Sword Attack"
+        self.attack3_name = "Shield"
+        self.attack4_name = " Night vision" #We'll change the name later just trying stuff for the discription
 
 ### Donne la possibilitè de passer sur les WALL
     def move(self, dx, dy):

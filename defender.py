@@ -8,6 +8,11 @@ class Defender(Unit):
     def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage):
         Unit.__init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage)
 
+        self.attack1_name = "Protector"
+        self.attack2_name = "Curing Power"
+        self.attack3_name = "Blue Fire"
+        self.attack4_name = " Eclipse" #Temp Name 
+
     def attack2(self): #augmentation constance de la defence prso
         self.defence = self.defence +2
 

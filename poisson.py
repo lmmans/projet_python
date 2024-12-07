@@ -10,6 +10,11 @@ class Poisson(Unit):
         self.bonus_attack = 3
         self.bonus_applied = False  # Flag per bonus
 
+        self.attack1_name = "Water Attack"
+        self.attack2_name = "Trident attack"
+        self.attack3_name = "Water Healing"
+        self.attack4_name = " Tsunami Call"
+
     def move(self, dx, dy):
         """Déplace l'unité de dx, dy si possible."""
         if self.vitesse > 0:  # Vérifie si des déplacements sont possibles

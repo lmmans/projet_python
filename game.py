@@ -21,13 +21,13 @@ class Game:
             La surface de la fenêtre du jeu.
         """
         self.screen = screen
-        self.player_units = [Oiseau(0, 0, 4,"Athena", 80, 2, 5, 'player', 3, 0),
+        self.player_units = [Oiseau(3, 0, 4,"Athena", 80, 2, 5, 'player', 3, 0),
                              Poisson(1, 0, 1,"Poseidon", 80, 8, 5, 'player', 3, 0),
                              Defender(2, 0, 4,"Hecate", 80, 1, 5, 'enemy', 2, 0)
                              ]
 
-        self.enemy_units = [Defender(6, 6, 4,"Hecate", 100, 8, 5, 'enemy', 1, 0),
-                            Assasin(7, 6, 4,"Zeus", 100, 8, 5, 'enemy', 1, 0)]
+        self.enemy_units = [Defender(3, 12, 4,"Hecate", 100, 8, 5, 'enemy', 1, 0),
+                            Assasin(13, 14, 4,"Zeus", 100, 8, 5, 'enemy', 1, 0)]
         
 
         #Génération de la riviere
@@ -42,14 +42,27 @@ class Game:
         self.generategrass=GenerateBlocks(ROWS,COLUMNS,'grass')
         self.grass_blocks=self.generategrass.create_grass()
         
-        self.font = pygame.font.SysFont('Arial', 24)
+        self.font = pygame.font.SysFont('Arial', 16)
+
+    def show_attack_options(self, selected_unit,x,y):
+        attack_text = [
+            f"Player: {selected_unit.nom}",
+            f"A: {selected_unit.attack1_name}",
+            f"S: {selected_unit.attack2_name}",
+            f"D: {selected_unit.attack3_name}",
+            f"F: {selected_unit.attack4_name}",
+        ]
+     
+        for i, line in enumerate(attack_text):
+            text_surface = self.font.render(line, True, WHITE)
+            self.screen.blit(text_surface, (x, y + i * 20))
 
     def handle_player_turn(self):
         """Tour du joueur"""
         for selected_unit in self.player_units:
             if selected_unit.nom == "Athena":
                 ###essaier de le faire bouger 2 pas a la fois
-                selected_unit.vitesse = 4 
+                selected_unit.vitesse = 4
             if selected_unit.nom == "Poseidon":
                 selected_unit.vitesse = 3
             if selected_unit.nom=="Zeus":
@@ -60,7 +73,6 @@ class Game:
             selected_unit.is_selected = True
             self.flip_display()
             while not has_acted:
-
                 # Important: cette boucle permet de gérer les événements Pygame
                 for event in pygame.event.get():
 
@@ -71,6 +83,14 @@ class Game:
 
                     # Gestion des touches du clavier
                     if event.type == pygame.KEYDOWN:
+                        """ 
+                        if selected_unit.nom=="Athena":
+                            steps=5
+                        elif selected_unit.nom=="Poseidon":
+                            steps=5
+                        else:
+                            steps=1
+                        """
 
                         # Déplacement (touches fléchées)
                         dx, dy = 0, 0
@@ -160,7 +180,7 @@ class Game:
                     self.player_units.remove(target)
 
 
-    def draw_health_as_hearts(self, unit, x_offset, y_offset):
+    def draw_health_as_hearts(self, unit, x_offset, y_offset,team):
         max_health = 100  
         heart_size = 20  
         num_hearts = 10  
@@ -168,11 +188,14 @@ class Game:
         filled_hearts = (unit.health / max_health) * num_hearts
         full_hearts = int(filled_hearts)  
         empty_hearts = num_hearts - full_hearts 
-
+        if team=="enemy":
+            heart_color=GREEN
+        elif team =="player":
+            heart_color=RED
         
         for i in range(full_hearts):
             heart_rect = pygame.Rect(x_offset + i * (heart_size + 5), y_offset, heart_size, heart_size)
-            pygame.draw.rect(self.screen, (255, 0, 0), heart_rect)  
+            pygame.draw.rect(self.screen, heart_color, heart_rect)  
 
         # Dessin des cœurs vides
         for i in range(full_hearts, num_hearts):
@@ -180,36 +203,97 @@ class Game:
             pygame.draw.rect(self.screen, (100, 100, 100), heart_rect) 
 
     def is_enemy_visible(self):
-        
-        visible=[]
-        for player in self.player_units:
-            if 0 <= player.x <= 4 and 0 <= player.y <= 5:
-                square_min_x, square_max_x = 0, 4
-                square_min_y, square_max_y = 0, 5
-            elif 6 <= player.x <= 14 and 0 <= player.y <= 10:
-                square_min_x, square_max_x = 6, 14
-                square_min_y, square_max_y = 0, 10
-            elif 0 <= player.x <= 5 and 7 <= player.y <= 14:
-                square_min_x, square_max_x = 0, 5
-                square_min_y, square_max_y = 7, 14
-            elif 5 <= player.x <= 14 and 10 <= player.y <= 14:
-                square_min_x, square_max_x = 5, 14
-                square_min_y, square_max_y = 10, 14
-            elif player.x==5 and  2 <= player.y <= 5:
-                square_min_x, square_max_x = 0, 14
-                square_min_y, square_max_y = 2, 5
-            elif player.y==6 and 3<=player.x<=4:
-                square_min_x, square_max_x = 3, 4
-                square_min_y, square_max_y = 0, 14
+        visible = []
 
-            else: 
-                square_max_x,square_min_x=14,0
-                square_max_y,square_min_y=14,0
+        for player in self.player_units:
+            if 0 <= player.x <= 2 and 0 <= player.y <= 1:
+                zones = 1
+                square_ranges = [(0, 5, 0, 6)]
+
+            elif 0 <= player.x <= 2 and 2 <= player.y <= 5:
+                zones = 2
+                square_ranges = [(0, 5, 0, 6), (0, 14, 2, 5)]
+
+            elif 3 <= player.x <= 4 and 2 <= player.y <= 5:
+                zones = 3
+                square_ranges = [(0, 5, 0, 6), (0, 14, 2, 5), (3, 5, 0, 14)]
+
+            elif 3 <= player.x <= 4 and 0 <= player.y <= 1:
+                zones = 2
+                square_ranges = [(0, 5, 0, 6), (3, 5, 0, 14)]
+
+            elif 6 <= player.x <= 10 and 0 <= player.y <= 1:
+                zones = 1
+                square_ranges = [(5, 14, 0, 9)]
+
+            elif 11 <= player.x <= 14 and 0 <= player.y <= 1:
+                zones = 2
+                square_ranges = [(5, 14, 0, 9), (11, 14, 0, 14)]
+
+            elif 6 <= player.x <= 10 and 2 <= player.y <= 5:
+                zones = 2
+                square_ranges = [(5, 14, 0, 9), (0, 14, 2, 5)]
+
+            elif 11 <= player.x <= 14 and 2 <= player.y <= 5:
+                zones = 3
+                square_ranges = [(5, 14, 0, 9), (0, 14, 2, 5), (11, 14, 0, 14)]
+
+            elif 6 <= player.x <= 10 and 6 <= player.y <= 8:
+                zones = 1
+                square_ranges = [(5, 14, 0, 9)]
+
+            elif 11 <= player.x <= 14 and 6 <= player.y <= 8:
+                zones = 2
+                square_ranges = [(5, 14, 0, 9), (11, 14, 0, 14)]
+
+            elif 11 <= player.x <= 14 and 10 <= player.y <= 14:
+                zones = 2
+                square_ranges = [(0, 14, 9, 14), (11, 14, 0, 14)]
+
+            elif 5 <= player.x <= 10 and 10 <= player.y <= 14:
+                zones = 1
+                square_ranges = [(0, 14, 9, 14)]
+
+            elif 3 <= player.x <= 4 and 10 <= player.y <= 14:
+                zones = 3
+                square_ranges = [(0, 14, 10, 14), (3, 4, 0, 14), (0, 4, 7, 14)]
+
+            elif 0 <= player.x <= 2 and 10 <= player.y <= 14:
+                zones = 2
+                square_ranges = [(0, 14, 10, 14), (0, 4, 7, 14)]
+
+            elif 0 <= player.x <= 2 and 7 <= player.y <= 9:
+                zones = 2
+                square_ranges = [(0, 4, 7, 14)]
+
+            elif 3 <= player.x <= 4 and 7 <= player.y <= 9:
+                zones = 2
+                square_ranges = [(3, 4, 0, 14), (0, 4, 7, 14)]
+
+            elif player.y==6 and 3<=player.x<=4:
+                zones=1
+                square_ranges = [(0, 5, 0, 14)]
+
+            elif player.y==9 and 11<=player.y<=14:
+                zones=1
+                square_ranges = [(5, 14, 0, 14)]
+
+            elif player.x==5 and 2<=player.y<=5:
+                zones=2
+                square_ranges = [(0, 14, 0, 6),(6,14,6,8)]
+            
+            else:
+                square_ranges=[(0,14,0,14)]
+
+            # Check if any enemy is within the visibility zone
             for enemy in self.enemy_units:
-                if square_min_x <= enemy.x <= square_max_x and square_min_y <= enemy.y <= square_max_y:
-                    visible.append(True) # Enemy is visible
+                for (min_x, max_x, min_y, max_y) in square_ranges:
+                    if min_x <= enemy.x <= max_x and min_y <= enemy.y <= max_y:
+                        visible.append(True)  # Enemy is visible in this square
+                        break
                 else:
-                    visible.append(False) # Enemy is outside the square
+                    visible.append(False)  # Enemy is outside all squares
+
         return visible
 
     def flip_display(self):
@@ -259,31 +343,41 @@ class Game:
             name_text = self.font.render(f"Name: {unit.nom}", True, WHITE)
             self.screen.blit(name_text, (x_offset, y_offset)) 
             y_offset += 30  
-
+            """ 
             health_text = self.font.render(f"Health: {unit.health}", True, WHITE)
             self.screen.blit(health_text, (x_offset, y_offset)) 
             y_offset += 30
-
+            
             attack_text = self.font.render(f"Attack: {unit.attack_power_base}", True, WHITE)
             self.screen.blit(attack_text, (x_offset, y_offset))  
             y_offset += 30
-            self.draw_health_as_hearts(unit, WIDTH + 20, y_offset)
+            """ 
+            self.draw_health_as_hearts(unit, WIDTH + 20, y_offset,"player")
             y_offset += 40  
 
         for enemy in self.enemy_units:
             name_text = self.font.render(f"Name: {enemy.nom}", True, WHITE)
             self.screen.blit(name_text, (x_offset, y_offset)) 
             y_offset += 30  
-
+            """ 
             health_text = self.font.render(f"Health: {enemy.health}", True, WHITE)
             self.screen.blit(health_text, (x_offset, y_offset))  
             y_offset += 30
-
+            
             attack_text = self.font.render(f"Attack Power: {enemy.attack_power_base}", True, WHITE)
             self.screen.blit(attack_text, (x_offset, y_offset)) 
             y_offset += 30
-            self.draw_health_as_hearts(enemy, WIDTH + 20, y_offset)
+            """ 
+            self.draw_health_as_hearts(enemy, WIDTH + 20, y_offset,"enemy")
             y_offset += 40  
+
+            attack_window_rect = pygame.Rect(WIDTH, HEIGHT - 120, 200, 120)
+            pygame.draw.rect(self.screen, (50, 50, 50), attack_window_rect)
+            pygame.draw.rect(self.screen, WHITE, attack_window_rect, 2)
+
+            for unit in self.player_units:
+                if unit.is_selected:
+                    self.show_attack_options(unit, attack_window_rect.left + 10, attack_window_rect.top + 10)
 
         # Rafraîchit l'écran
         pygame.display.flip()
