@@ -12,13 +12,13 @@ class Position:
     def move(self, dx, dy):
         """Déplace l'unité de dx, dy si possible."""
         #self.vitesse = self.vitesse
-        if self.vitesse > 0:  # Vérifie si des déplacements sont possibles
+        if self.vitesse > 0:
             new_x = self.x + dx
             new_y = self.y + dy
             if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in DONOTGO:
                 self.x = new_x
                 self.y = new_y
-                self.vitesse -= 1  # Réduit la vitesse après chaque mouvement
+                self.vitesse -= 1
 
 class Unit(Position):
     def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage):
@@ -37,12 +37,11 @@ class Unit(Position):
         degas = self.attack_power_base 
         return degas        
    
-### Si attack < defence enemy au moins lui font 1 dega
+    # Si attack < defence enemy au moins lui font 1 dega
     def attack1(self, target):
         attack_minimum = 1
         a = self.attack_1()
         degas = max(attack_minimum, a - target.defence)
-        #if abs(self.x - target.x) <= self.distance_attack and abs(self.y - target.y) <= self.distance_attack:
         target.health -= degas
         
 
@@ -50,14 +49,61 @@ class Unit(Position):
         """Affiche l'unité sur l'écran."""
         if self.nom=="Athena":
             photo=pygame.image.load("ATHENA.jpeg")
+        # creation carrè distance_attaque si unité selectioné
+            if self.is_selected:
+                pygame.draw.rect(screen, RED, ((self.x - self.distance_attack) * CELL_SIZE,
+                                (self.y - self.distance_attack)* CELL_SIZE, 
+                                CELL_SIZE*(self.distance_attack*2 + 1), CELL_SIZE*(self.distance_attack*2 + 1)), 2)
         elif self.nom=="Poseidon":
             photo=photo=pygame.image.load("poseidon.jpeg")
+            if self.is_selected:
+                pygame.draw.rect(screen, RED, ((self.x - self.distance_attack) * CELL_SIZE,
+                                (self.y - self.distance_attack)* CELL_SIZE, 
+                                CELL_SIZE*(self.distance_attack*2 + 1), CELL_SIZE*(self.distance_attack*2 + 1)), 2)
         elif self.nom=="Zeus":
             photo=pygame.image.load("zeus.jpeg")
+            if self.is_selected:
+                pygame.draw.rect(screen, RED, ((self.x - self.distance_attack) * CELL_SIZE,
+                                (self.y - self.distance_attack)* CELL_SIZE, 
+                                CELL_SIZE*(self.distance_attack*2 + 1), CELL_SIZE*(self.distance_attack*2 + 1)), 2)
         elif self.nom=="Hecate":
             photo=pygame.image.load("hecate.png")
+            if self.is_selected:
+                pygame.draw.rect(screen, RED, ((self.x - self.distance_attack) * CELL_SIZE,
+                                (self.y - self.distance_attack)* CELL_SIZE, 
+                                CELL_SIZE*(self.distance_attack*2 + 1), CELL_SIZE*(self.distance_attack*2 + 1)), 2)
 
         scaled_image = pygame.transform.scale(photo, (CELL_SIZE,CELL_SIZE))
         screen.blit(scaled_image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
+
+class Bombe:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.is_selected = True
+        self.steps_left = 3
+
+    def draw(self, screen):   
+        if self.is_selected:
+            pygame.draw.rect(screen, GREEN, ((self.x - 0.25) * CELL_SIZE,
+                (self.y - 0.25) * CELL_SIZE, CELL_SIZE*1.5, CELL_SIZE*1.5), 4)
+            
+    def move(self, dx, dy):
+        self.steps_left = 3
+        """Déplace l'unité de dx, dy."""
+        if 0 <= self.x + dx < GRID_SIZE and 0 <= self.y + dy < GRID_SIZE:
+            if self.steps_left > 0: 
+                self.x += dx
+                self.y += dy
+                self.steps_left -= 1 
+    
+    def attack_bombe(self, enemy):
+        """Esegue l'attacco ai nemici nelle vicinanze."""
+        degas = 5 
+        enemy.health -= degas
+        if enemy.health <= 0:
+            enemy.remove(enemy) 
+        return True  # Signale que la bombe a effectè l'attaque (destruction bombe)
+
 
 

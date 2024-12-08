@@ -44,6 +44,8 @@ class Game:
         
         self.font = pygame.font.SysFont('Arial', 16)
 
+        self.bombe_unit = []
+
     def show_attack_options(self, selected_unit,x,y):
         attack_text = [
             f"Player: {selected_unit.nom}",
@@ -65,7 +67,7 @@ class Game:
                 selected_unit.vitesse = 4
             if selected_unit.nom == "Poseidon":
                 selected_unit.vitesse = 3
-            if selected_unit.nom=="Zeus":
+            if selected_unit.nom=="Hecate":
                 selected_unit.vitesse=5
 
             # Tant que l'unité n'a pas terminé son tour
@@ -107,61 +109,103 @@ class Game:
                             selected_unit.move(dx, dy)
                             self.flip_display()
 
-                    #attaques
+                    #ATTAQUES
+                        #attaque "a" (Athena, Poseidon -> attque multiple)
                         if event.key == pygame.K_a:
                             for enemy in self.enemy_units:
-                                # Controlla se il nemico è entro il raggio di attacco
+                                # boucle pou attaquer tout les enemy
                                 if abs(selected_unit.x - enemy.x) <= selected_unit.distance_attack and abs(selected_unit.y - enemy.y) <= selected_unit.distance_attack:
                                     selected_unit.attack1(enemy)
                                     if enemy.health <= 0:
                                         self.enemy_units.remove(enemy)
-
+                            #changer l'unité apre l'attaque
                             has_acted = True
                             selected_unit.is_selected = False
-                                    # Mostra opzioni d'attacco
-                                    
+
+                        # attaque "s" (Hecate -> defene +2)                                         
                         elif event.key == pygame.K_s:
-                            #for enemy in self.enemy_units:
-                                #if abs(selected_unit.x - enemy.x) <= 1 and abs(selected_unit.y - enemy.y) <= 1:
                             selected_unit.attack2()
-                                    #if enemy.health <= 0:
-                                        #self.enemy_units.remove(enemy)
                             has_acted = True
                             selected_unit.is_selected = False
 
-                            #selected_unit.attack2(enemy)  # Esegue il secondo tipo di attacco
+                        # attaque "d" (Hecate -> health +5 allies)
                         elif event.key == pygame.K_d:
+                            # boucle pour tous les allies...
                             for unit in (self.player_units):
+                                # ...sauf lui
                                 if unit != selected_unit:
-                                # Controlla se il nemico è entro il raggio di attacco
                                     if abs(selected_unit.x - unit.x) <= selected_unit.distance_attack and abs(selected_unit.y - unit.y) <= selected_unit.distance_attack:
-                                        selected_unit.attack3(unit)
-                                    #if enemy.health <= 0:
-                                        #self.enemy_units.remove(enemy)
-                            #selected_unit.attack3(enemy)  # Esegue il terzo tipo di attacco
-                            has_acted = True
-                            selected_unit.is_selected = False
-                            #selected_unit.attack3(enemy)  # Esegue il terzo tipo di attacco
-                        
-                        if event.key == pygame.K_f:
-                            for enemy in self.enemy_units:
-                                # Controlla se il nemico è entro il raggio di attacco
-                                if abs(selected_unit.x - enemy.x) <= selected_unit.distance_attack and abs(selected_unit.y - enemy.y) <= selected_unit.distance_attack:
-                                    selected_unit.attack4(enemy)
-                                    if enemy.health <= 0:
-                                        self.enemy_units.remove(enemy)
-
+                                        selected_unit.attack3(unit)  
                             has_acted = True
                             selected_unit.is_selected = False
 
+                        # attque "f" (Athena, Zeus -> attaque siblé)
+                        elif event.key == pygame.K_f:
+                            if selected_unit.nom == "Athena" or selected_unit.nom == "Hecate":
+                                # creation unité dans la liste ""self.bombe_unit"
+                                new_bombe = Bombe(selected_unit.x, selected_unit.y)
+                                self.bombe_unit.append(new_bombe)
+                                #self.bombe_unit.draw(self.screen)
+                                self.flip_display()
+                                self.handle_bombe_turn(new_bombe)
+                                        
+                            elif selected_unit.nom == "Poseidon" or selected_unit.nom == "Zeus":
+                                pass
+                            has_acted = True
+                            selected_unit.is_selected = False
+
+                        elif event.key == pygame.K_SPACE:
+                            has_acted = True
+                            selected_unit.is_selected = False
+
+    # le turn de la Bombe est actioné seulement si on utilise la touche "f"
+    def handle_bombe_turn(self, bombe_unit):
+            """Tour de la bombe"""
+    # j'ai du recopier les touche clavier pour pouvoir deplacer la bombe (comment si c'etait un unitè)
+            while bombe_unit.steps_left > 0:
+                self.flip_display()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        exit()
+                    if event.type == pygame.KEYDOWN:
+                        dx, dy = 0, 0
+                        if event.key == pygame.K_LEFT:
+                            dx = -1
+                        elif event.key == pygame.K_RIGHT:
+                            dx = 1
+                        elif event.key == pygame.K_UP:
+                            dy = -1
+                        elif event.key == pygame.K_DOWN:
+                            dy = 1
+
+                #appelle a la def move de la bombe
+                        bombe_unit.move(dx, dy)
+                        self.flip_display()
+
+                # touche SPACE pour attaquer ou installer la bombe
                         if event.key == pygame.K_SPACE:
-                            has_acted = True
-                            selected_unit.is_selected = False
-
-        ### encor a implementer
-                        #for enemy in self.enemy_units:
-                            #enemy.health -= enemy.additional_damage
-
+            
+                            for unit in self.player_units:
+                # Zeus -> lance la bombe, la bombe est detruit apres l'attaque
+                # aussi si la cible n'est pas touchè
+                                if unit.nom == "Hecate":
+                                    for enemy in self.enemy_units: 
+                                        bombe_unit.attack_bombe(enemy)
+                                        self.bombe_unit.remove(bombe_unit)  # Rimuove correttamente la bomba dalla lista
+                                        self.flip_display()
+                                        return
+                # Athena -> installe la bombe (trap) au sol
+                # trap detrite seulement si l'enemy la touche                    
+                                elif unit.nom == "Athena":
+                                    for enemy in self.enemy_units:
+                                        if enemy.x ==bombe_unit.x and enemy.y == bombe_unit.y:
+                                            bombe_unit.attack_bombe(enemy)
+                                            self.bombe_unit.remove(bombe_unit)#bombe_unit = None  # Rimuove la bomba dopo l'attacco
+                                            self.flip_display()
+                                        else:
+                                            self.flip_display()
+                                            return
 
     def handle_enemy_turn(self):
         """IA très simple pour les ennemis."""
@@ -172,6 +216,16 @@ class Game:
             dx = 1 if enemy.x < target.x else -1 if enemy.x > target.x else 0
             dy = 1 if enemy.y < target.y else -1 if enemy.y > target.y else 0
             enemy.move(dx, dy)
+            #pendant le tour de l'enemy on controlle si il est sur la trap ou no
+            if self.bombe_unit:
+            # [:] -> scansion de tous les trap et verification coordonnè avant de la detruire
+                for bombe in self.bombe_unit[:]:
+                    if enemy.x == bombe.x and enemy.y == bombe.y:
+                        bombe.attack_bombe(enemy)
+                        self.bombe_unit.remove(bombe)
+                        self.flip_display()
+                    else:
+                        self.flip_display()
 
             # Attaque si possible
             if abs(enemy.x - target.x) <= enemy.distance_attack and abs(enemy.y - target.y) <= enemy.distance_attack:
@@ -317,6 +371,10 @@ class Game:
 
         for grass in self.grass_blocks:
             grass.draw(self.screen)
+
+        # Affiche les bombe/trap
+        for bombe in self.bombe_unit:
+            bombe.draw(self.screen)
         
 
         # Affiche les unités

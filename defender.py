@@ -28,10 +28,10 @@ class Defender(Unit):
         degas = self.attack_power_base*7
         return degas
 
-    def attack4(self, target):
+    """def attack4(self, target):
         attack_minimum = 1
         a = self.attack_normal()
         degas = max(attack_minimum, a - target.defence)
         target.additional_damage +=1
         #if abs(self.x - target.x) <= self.distance_attack and abs(self.y - target.y) <= self.distance_attack:
-        target.health -= degas
+        target.health -= degas"""
