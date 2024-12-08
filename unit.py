@@ -108,9 +108,9 @@ class Bombe:
     
     def attack_bombe(self, enemy):
         degas = 50 
-        if enemy.x == self.x and enemy.y == self.y:
+        if enemy.x == self.x and enemy.y == self.y: # ememy sur la meme position
             enemy.health -= degas
-        else:
+        else:      # enemy entre la distance d'action 
             enemy.health -= (degas/2)
         if enemy.health <= 0:
             enemy.remove(enemy)

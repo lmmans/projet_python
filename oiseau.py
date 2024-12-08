@@ -7,7 +7,6 @@ from block import *
 class Oiseau(Unit):
     def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage):
         Unit.__init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage)
-        self.bonus_attack = 3
         self.bonus_applied = False  # Flag per bonus
         
         self.photo=pygame.image.load("ATHENA.jpeg")    

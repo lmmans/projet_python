@@ -32,6 +32,6 @@ class Assasin(Unit):
         attack_minimum = 1
         a = self.attack_normal()
         degas = max(attack_minimum, a - target.defence)
-        target.additional_damage +=1
+        target.additional_damage +=10
         #if abs(self.x - target.x) <= self.distance_attack and abs(self.y - target.y) <= self.distance_attack:
         target.health -= degas 

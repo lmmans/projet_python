@@ -23,7 +23,8 @@ class Game:
         self.screen = screen
         self.player_units = [Oiseau(3, 0, 4,"Athena", 80, 2, 5, 'player', 3, 0),
                              Poisson(1, 0, 1,"Poseidon", 80, 8, 5, 'player', 3, 0),
-                             Defender(2, 0, 4,"Hecate", 80, 1, 5, 'enemy', 2, 0)
+                             Defender(2, 0, 4,"Hecate", 80, 1, 5, 'enemy', 2, 0),
+                             Assasin(4, 0, 6, "Zeus", 80, 10, 5, 'player', 1, 0)
                              ]
 
         self.enemy_units = [Defender(3, 12, 4,"Hecate", 100, 8, 5, 'enemy', 1, 0),
@@ -149,7 +150,7 @@ class Game:
 
                         # attque "f" (Athena, Zeus -> attaque siblé)
                         elif event.key == pygame.K_f:
-                            if selected_unit.nom == "Athena" or selected_unit.nom == "Hecate":
+                            if selected_unit.nom == "Athena" or selected_unit.nom == "Poseidon":
                                 # creation unité dans la liste ""self.bombe_unit"
                                 new_bombe = Bombe(selected_unit.x, selected_unit.y, 2)
                                 self.bombe_unit.append(new_bombe)
@@ -157,8 +158,16 @@ class Game:
                                 self.flip_display()
                                 self.handle_bombe_turn(new_bombe,selected_unit)
                                         
-                            elif selected_unit.nom == "Poseidon" or selected_unit.nom == "Zeus":
-                                pass
+                            elif selected_unit.nom == "Hecate":
+                                for unit in (self.player_units):
+                                    if unit != selected_unit:
+                                        if abs(selected_unit.x - unit.x) <= selected_unit.distance_attack and abs(selected_unit.y - unit.y) <= selected_unit.distance_attack:
+                                            selected_unit.attack4(unit)
+
+                            elif selected_unit.nom == "Zeus":
+                                for enemy in (self.enemy_units):
+                                        if abs(selected_unit.x - enemy.x) <= selected_unit.distance_attack and abs(selected_unit.y - enemy.y) <= selected_unit.distance_attack:
+                                            selected_unit.attack4(enemy)  
                             has_acted = True
                             selected_unit.is_selected = False
 
@@ -196,7 +205,7 @@ class Game:
 
                 # Zeus -> lance la bombe, la bombe est detruit apres l'attaque
                 # aussi si la cible n'est pas touchè
-                                if selected_unit.nom == "Hecate":
+                                if selected_unit.nom == "Poseidon":
                                     for enemy in self.enemy_units:
                                         if abs(enemy.x - bombe_unit.x) <= bombe_unit.distance_attack and abs(enemy.y - bombe_unit.y) <= bombe_unit.distance_attack: 
                                             bombe_unit.attack_bombe(enemy)
@@ -224,6 +233,7 @@ class Game:
     def handle_enemy_turn(self):
         """IA très simple pour les ennemis."""
         for enemy in self.enemy_units:
+            enemy.health -= enemy.additional_damage
 
             # Déplacement aléatoire
             target = random.choice(self.player_units)
@@ -422,8 +432,8 @@ class Game:
             
             attack_text = self.font.render(f"Attack: {unit.attack_power_base}", True, WHITE)
             self.screen.blit(attack_text, (x_offset, y_offset))  
-            y_offset += 30
-            """ 
+            y_offset += 30"""
+             
             self.draw_health_as_hearts(unit, WIDTH + 20, y_offset,"player")
             y_offset += 40  
 

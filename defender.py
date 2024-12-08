@@ -19,8 +19,11 @@ class Defender(Unit):
     def attack3(self, target):
         target.health += 5
 
+    def attack4(self, target):
+        target.attack_power_base += 4
+
     ###temporaire
-    def attack_normal(self):
+    """def attack_normal(self):
         degas = self.attack_power_base
         return degas
     
@@ -28,7 +31,7 @@ class Defender(Unit):
         degas = self.attack_power_base*7
         return degas
 
-    """def attack4(self, target):
+    def attack4(self, target):
         attack_minimum = 1
         a = self.attack_normal()
         degas = max(attack_minimum, a - target.defence)
