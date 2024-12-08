@@ -12,13 +12,16 @@ class Position:
     def move(self, dx, dy):
         """Déplace l'unité de dx, dy si possible."""
         #self.vitesse = self.vitesse
+        #temp = self.vitesse
+        #print(temp)
         if self.vitesse > 0:
             new_x = self.x + dx
             new_y = self.y + dy
             if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in DONOTGO:
                 self.x = new_x
                 self.y = new_y
-                self.vitesse -= 1
+                self.vitesse -= 1        
+
 
 class Unit(Position):
     def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage):
@@ -77,11 +80,15 @@ class Unit(Position):
         screen.blit(scaled_image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
 
 class Bombe:
-    def __init__(self, x, y):
+    def __init__(self, x, y, distance_attack):
         self.x = x
         self.y = y
+        self.depart_x = x
+        self.depart_y = y
+        self.distance_attack = distance_attack
+        
         self.is_selected = True
-        self.steps_left = 3
+
 
     def draw(self, screen):   
         if self.is_selected:
@@ -89,21 +96,26 @@ class Bombe:
                 (self.y - 0.25) * CELL_SIZE, CELL_SIZE*1.5, CELL_SIZE*1.5), 4)
             
     def move(self, dx, dy):
-        self.steps_left = 3
-        """Déplace l'unité de dx, dy."""
-        if 0 <= self.x + dx < GRID_SIZE and 0 <= self.y + dy < GRID_SIZE:
-            if self.steps_left > 0: 
-                self.x += dx
-                self.y += dy
-                self.steps_left -= 1 
+        """Déplace l'unité de dx, dy, restreint à une zone 3x3."""
+        new_x = self.x + dx
+        new_y = self.y + dy
+        # Pour controler que le mouvement soit en un carrè 3*3
+        if (self.depart_x - 3 <= new_x <= self.depart_x + 3 and
+            self.depart_y - 3 <= new_y <= self.depart_y + 3):
+            if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE:
+                self.x = new_x
+                self.y = new_y
     
     def attack_bombe(self, enemy):
-        """Esegue l'attacco ai nemici nelle vicinanze."""
-        degas = 5 
-        enemy.health -= degas
+        degas = 50 
+        if enemy.x == self.x and enemy.y == self.y:
+            enemy.health -= degas
+        else:
+            enemy.health -= (degas/2)
         if enemy.health <= 0:
-            enemy.remove(enemy) 
-        return True  # Signale que la bombe a effectè l'attaque (destruction bombe)
+            enemy.remove(enemy)
+         
+
 
 
 

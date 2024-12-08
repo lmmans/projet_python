@@ -29,6 +29,7 @@ class Game:
         self.enemy_units = [Defender(3, 12, 4,"Hecate", 100, 8, 5, 'enemy', 1, 0),
                             Assasin(13, 14, 4,"Zeus", 100, 8, 5, 'enemy', 1, 0)]
         
+        self.initial_speed = [player.vitesse for player in self.player_units]
 
         #Génération de la riviere
         self.generateriver=GenerateBlocks(ROWS,COLUMNS,'river')
@@ -61,14 +62,21 @@ class Game:
 
     def handle_player_turn(self):
         """Tour du joueur"""
+        #print(self.initial_speed)
+        #print("coucou")
+        i = 0
         for selected_unit in self.player_units:
-            if selected_unit.nom == "Athena":
+            
+            selected_unit.vitesse = self.initial_speed[i]
+            print(self.initial_speed[i])
+            i += 1
+            #print(selected_unit.vitesse)
                 ###essaier de le faire bouger 2 pas a la fois
-                selected_unit.vitesse = 4
-            if selected_unit.nom == "Poseidon":
-                selected_unit.vitesse = 3
-            if selected_unit.nom=="Hecate":
-                selected_unit.vitesse=5
+               # selected_unit.vitesse = 4
+            #if selected_unit.nom == "Poseidon":
+            #    selected_unit.vitesse = 3
+            #if selected_unit.nom=="Hecate":
+            #    selected_unit.vitesse=5
 
             # Tant que l'unité n'a pas terminé son tour
             has_acted = False
@@ -110,7 +118,7 @@ class Game:
                             self.flip_display()
 
                     #ATTAQUES
-                        #attaque "a" (Athena, Poseidon -> attque multiple)
+                        #attaque "a" (attque multiple base pour tous)
                         if event.key == pygame.K_a:
                             for enemy in self.enemy_units:
                                 # boucle pou attaquer tout les enemy
@@ -143,11 +151,11 @@ class Game:
                         elif event.key == pygame.K_f:
                             if selected_unit.nom == "Athena" or selected_unit.nom == "Hecate":
                                 # creation unité dans la liste ""self.bombe_unit"
-                                new_bombe = Bombe(selected_unit.x, selected_unit.y)
+                                new_bombe = Bombe(selected_unit.x, selected_unit.y, 2)
                                 self.bombe_unit.append(new_bombe)
                                 #self.bombe_unit.draw(self.screen)
                                 self.flip_display()
-                                self.handle_bombe_turn(new_bombe)
+                                self.handle_bombe_turn(new_bombe,selected_unit)
                                         
                             elif selected_unit.nom == "Poseidon" or selected_unit.nom == "Zeus":
                                 pass
@@ -159,11 +167,10 @@ class Game:
                             selected_unit.is_selected = False
 
     # le turn de la Bombe est actioné seulement si on utilise la touche "f"
-    def handle_bombe_turn(self, bombe_unit):
+    def handle_bombe_turn(self, bombe_unit, selected_unit):
             """Tour de la bombe"""
-    # j'ai du recopier les touche clavier pour pouvoir deplacer la bombe (comment si c'etait un unitè)
-            while bombe_unit.steps_left > 0:
-                self.flip_display()
+            has_acted = False # boucle le cicle entier      
+            while not has_acted:   
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit()
@@ -177,35 +184,42 @@ class Game:
                         elif event.key == pygame.K_UP:
                             dy = -1
                         elif event.key == pygame.K_DOWN:
-                            dy = 1
+                                dy = 1
 
-                #appelle a la def move de la bombe
-                        bombe_unit.move(dx, dy)
-                        self.flip_display()
+                    #appelle a la def move de la bombe
+                        if not has_acted:  # Permette di muovere solo finché non è stata fatta un'azione
+                            bombe_unit.move(dx, dy)
+                            self.flip_display()
 
                 # touche SPACE pour attaquer ou installer la bombe
                         if event.key == pygame.K_SPACE:
-            
-                            for unit in self.player_units:
+
                 # Zeus -> lance la bombe, la bombe est detruit apres l'attaque
                 # aussi si la cible n'est pas touchè
-                                if unit.nom == "Hecate":
-                                    for enemy in self.enemy_units: 
-                                        bombe_unit.attack_bombe(enemy)
+                                if selected_unit.nom == "Hecate":
+                                    for enemy in self.enemy_units:
+                                        if abs(enemy.x - bombe_unit.x) <= bombe_unit.distance_attack and abs(enemy.y - bombe_unit.y) <= bombe_unit.distance_attack: 
+                                            bombe_unit.attack_bombe(enemy)
                                         self.bombe_unit.remove(bombe_unit)  # Rimuove correttamente la bomba dalla lista
                                         self.flip_display()
-                                        return
+                                        return 
+                                    if not enemy:
+                                            self.bombe_unit.remove(bombe_unit)  # Rimuove correttamente la bomba dalla lista
+                                            self.flip_display()
+                                            return
+                                    
                 # Athena -> installe la bombe (trap) au sol
                 # trap detrite seulement si l'enemy la touche                    
-                                elif unit.nom == "Athena":
+                                elif selected_unit.nom == "Athena":
                                     for enemy in self.enemy_units:
-                                        if enemy.x ==bombe_unit.x and enemy.y == bombe_unit.y:
+                                        if enemy.x == bombe_unit.x and enemy.y == bombe_unit.y:
                                             bombe_unit.attack_bombe(enemy)
                                             self.bombe_unit.remove(bombe_unit)#bombe_unit = None  # Rimuove la bomba dopo l'attacco
                                             self.flip_display()
                                         else:
                                             self.flip_display()
                                             return
+        
 
     def handle_enemy_turn(self):
         """IA très simple pour les ennemis."""
