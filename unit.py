@@ -80,42 +80,54 @@ class Unit(Position):
         screen.blit(scaled_image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
 
 class Bombe:
-    def __init__(self, x, y, distance_attack):
+    def __init__(self, x, y, distance_attack,team):
         self.x = x
         self.y = y
         self.depart_x = x
         self.depart_y = y
         self.distance_attack = distance_attack
+        self.team=team
         
         self.is_selected = True
 
 
     def draw(self, screen):   
         if self.is_selected:
-            pygame.draw.rect(screen, GREEN, ((self.x - 0.25) * CELL_SIZE,
+            if self.team=="player":
+                bomb_color=GREEN
+            else:
+                bomb_color= YELLOW
+
+            pygame.draw.rect(screen, bomb_color, ((self.x - 0.25) * CELL_SIZE,
                 (self.y - 0.25) * CELL_SIZE, CELL_SIZE*1.5, CELL_SIZE*1.5), 4)
-            
+    
+           
     def move(self, dx, dy):
-        """Déplace l'unité de dx, dy, restreint à une zone 3x3."""
+        "Déplace l'unité de dx, dy, restreint à une zone 3x3."
         new_x = self.x + dx
         new_y = self.y + dy
         # Pour controler que le mouvement soit en un carrè 3*3
         if (self.depart_x - 3 <= new_x <= self.depart_x + 3 and
-            self.depart_y - 3 <= new_y <= self.depart_y + 3):
+            self.depart_y - 3 <= new_y <= self.depart_y + 3) and self.team=="player":
             if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE:
                 self.x = new_x
                 self.y = new_y
+            
     
-    def attack_bombe(self, enemy):
+    def attack_bombe(self, enemy,enemy_list):
         degas = 50 
         if enemy.x == self.x and enemy.y == self.y: # ememy sur la meme position
             enemy.health -= degas
         else:      # enemy entre la distance d'action 
             enemy.health -= (degas/2)
         if enemy.health <= 0:
-            enemy.remove(enemy)
-         
+            enemy_list.remove(enemy)
 
+    def bombe_affected_zone(self, burnt_grass_list):
+        for dx in range(-1, 2):  
+            for dy in range(-1, 2):  
+                if (self.x+dx,self.y+dy)not in DONOTGO:
+                    burnt_grass_list.append((self.x + dx, self.y + dy))
 
-
+        
 

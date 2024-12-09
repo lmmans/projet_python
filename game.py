@@ -28,7 +28,7 @@ class Game:
                              ]
 
         self.enemy_units = [Defender(3, 12, 4,"Hecate", 100, 8, 5, 'enemy', 1, 0),
-                            Assasin(13, 14, 4,"Zeus", 100, 8, 5, 'enemy', 1, 0)]
+                            Assasin(13, 14, 4,"Zeus", 100, 8, 5, 'enemy', 2, 0)]
         
         self.initial_speed = [player.vitesse for player in self.player_units]
 
@@ -47,6 +47,9 @@ class Game:
         self.font = pygame.font.SysFont('Arial', 16)
 
         self.bombe_unit = []
+        self.bombe_enemy= []
+        self.burnt_grass= []
+        self.traps_placed=[]
 
     def show_attack_options(self, selected_unit,x,y):
         attack_text = [
@@ -69,7 +72,7 @@ class Game:
         for selected_unit in self.player_units:
             
             selected_unit.vitesse = self.initial_speed[i]
-            print(self.initial_speed[i])
+            #print(self.initial_speed[i])
             i += 1
             #print(selected_unit.vitesse)
                 ###essaier de le faire bouger 2 pas a la fois
@@ -152,7 +155,7 @@ class Game:
                         elif event.key == pygame.K_f:
                             if selected_unit.nom == "Athena" or selected_unit.nom == "Poseidon":
                                 # creation unité dans la liste ""self.bombe_unit"
-                                new_bombe = Bombe(selected_unit.x, selected_unit.y, 2)
+                                new_bombe = Bombe(selected_unit.x, selected_unit.y, 2,"player")
                                 self.bombe_unit.append(new_bombe)
                                 #self.bombe_unit.draw(self.screen)
                                 self.flip_display()
@@ -208,7 +211,8 @@ class Game:
                                 if selected_unit.nom == "Poseidon":
                                     for enemy in self.enemy_units:
                                         if abs(enemy.x - bombe_unit.x) <= bombe_unit.distance_attack and abs(enemy.y - bombe_unit.y) <= bombe_unit.distance_attack: 
-                                            bombe_unit.attack_bombe(enemy)
+                                            bombe_unit.attack_bombe(enemy,self.enemy_units)
+                                            bombe_unit.bombe_affected_zone(self.burnt_grass)
                                         self.bombe_unit.remove(bombe_unit)  # Rimuove correttamente la bomba dalla lista
                                         self.flip_display()
                                         return 
@@ -222,41 +226,145 @@ class Game:
                                 elif selected_unit.nom == "Athena":
                                     for enemy in self.enemy_units:
                                         if enemy.x == bombe_unit.x and enemy.y == bombe_unit.y:
-                                            bombe_unit.attack_bombe(enemy)
+                                            bombe_unit.attack_bombe(enemy,self.enemy_units)
+                                            bombe_unit.bombe_affected_zone(self.burnt_grass)
                                             self.bombe_unit.remove(bombe_unit)#bombe_unit = None  # Rimuove la bomba dopo l'attacco
                                             self.flip_display()
                                         else:
                                             self.flip_display()
-                                            return
-        
+                                    return
+                                
 
+
+    def move_towards_target(self,enemy, target, NOMove):
+        
+        possible_moves = []
+
+        
+        if (enemy.x + 1, enemy.y) not in NOMove:
+            possible_moves.append((1, 0))  # Move right
+
+        
+        if (enemy.x - 1, enemy.y) not in NOMove:
+            possible_moves.append((-1, 0))  # Move left
+
+        
+        if (enemy.x, enemy.y + 1) not in NOMove:
+            possible_moves.append((0, 1))  # Move down
+
+        
+        if (enemy.x, enemy.y - 1) not in NOMove:
+            possible_moves.append((0, -1))  # Move up
+
+        
+        if (enemy.x + 1, enemy.y - 1) not in NOMove:
+            possible_moves.append((1, -1))  # Move right and up
+
+        
+        if (enemy.x + 1, enemy.y + 1) not in NOMove:
+            possible_moves.append((1, 1))  # Move right and down
+
+        
+        if (enemy.x - 1, enemy.y - 1) not in NOMove:
+            possible_moves.append((-1, -1))  # Move left and up
+
+        
+        if (enemy.x - 1, enemy.y + 1) not in NOMove:
+            possible_moves.append((-1, 1))  # Move left and down
+
+        
+        if possible_moves:
+            
+            best_moves = []
+            min_distance = float('inf')
+
+            for dx, dy in possible_moves:
+                new_x = enemy.x + dx
+                new_y = enemy.y + dy
+                distance_to_target = abs(new_x - target.x) + abs(new_y - target.y)
+
+                
+                if distance_to_target < min_distance:
+                    best_moves = [(dx, dy)]
+                    min_distance = distance_to_target
+                elif distance_to_target == min_distance:
+                    best_moves.append((dx, dy))
+
+            dx, dy = random.choice(best_moves)
+            return dx,dy
+        else:
+            dx,dy=0
+            return dx,dy
+        
     def handle_enemy_turn(self):
         """IA très simple pour les ennemis."""
         for enemy in self.enemy_units:
-            enemy.health -= enemy.additional_damage
-
             # Déplacement aléatoire
             target = random.choice(self.player_units)
-            dx = 1 if enemy.x < target.x else -1 if enemy.x > target.x else 0
-            dy = 1 if enemy.y < target.y else -1 if enemy.y > target.y else 0
-            enemy.move(dx, dy)
+            if target.nom=="Athena":
+                move_not_possible=RIVER
+            elif target.nom=="Poseidon":
+                move_not_possible=WALL
+            else: 
+                move_not_possible=DONOTGO
+            
+            
+            dx,dy=self.move_towards_target(enemy,target,move_not_possible)
+            enemy.move(dx,dy)
+            print(f"{enemy.nom}:{dx,dy}")
+                 
             #pendant le tour de l'enemy on controlle si il est sur la trap ou no
             if self.bombe_unit:
             # [:] -> scansion de tous les trap et verification coordonnè avant de la detruire
                 for bombe in self.bombe_unit[:]:
                     if enemy.x == bombe.x and enemy.y == bombe.y:
-                        bombe.attack_bombe(enemy)
+                        bombe.attack_bombe(enemy,self.enemy_units)
+                        bombe.bombe_affected_zone(self.burnt_grass)
                         self.bombe_unit.remove(bombe)
                         self.flip_display()
                     else:
                         self.flip_display()
 
-            # Attaque si possible
-            if abs(enemy.x - target.x) <= enemy.distance_attack and abs(enemy.y - target.y) <= enemy.distance_attack:
-                enemy.attack1(target)
-                if target.health <= 0:
-                    self.player_units.remove(target)
+            attack_methods =enemy.attack_methodes
+            chosen_attack = random.choice(attack_methods)
+            print(chosen_attack)
+            print(target)
+            """ 
+            #POUR DEBUGGER
+            if enemy.nom== "Zeus":
+                print(chosen_attack)
+                target=self.player_units[0]
+                chosen_attack="Attack BOMB"
+            """
 
+            if abs(enemy.x - target.x) <= enemy.distance_attack and abs(enemy.y - target.y) <= enemy.distance_attack:
+                if chosen_attack == "Attack BOMB":
+                    if hasattr(enemy, "throw_bomb") and enemy.throw_bomb:
+                            # Decide target location for the bomb (Avoid Having 100% Precision each time)
+                        bomb_target_x = random.choice([target.x + 1, target.x - 1, target.x])
+                        bomb_target_y = random.choice([target.y + 1, target.y - 1, target.y])
+                            # Place a bomb at the target location
+                        new_bomb = Bombe(bomb_target_x, bomb_target_y,enemy.distance_attack,enemy.team)
+                        new_bomb.move(bomb_target_x, bomb_target_y)
+                        new_bomb.attack_bombe(target,self.player_units)
+                        new_bomb.bombe_affected_zone(self.burnt_grass)
+                        self.bombe_enemy.append(new_bomb)
+                        self.flip_display()
+                        if self.bombe_enemy:
+                            self.bombe_enemy.remove(self.bombe_enemy[-1])
+                        continue  # Enemy turn ends after throwing a bomb
+                    else:
+                        if chosen_attack=="Attack Proche":
+                            if abs(enemy.x - target.x) <= 1 and abs(enemy.y - target.y) <= 1:
+                                    enemy.attack_normal()
+                            if chosen_attack=="Attack Loin":
+                                if abs(enemy.x - target.x) <= enemy.distance_attack and abs(enemy.y - target.y) <= enemy.distance_attack:
+                                    enemy.attack1(target)
+                                    if target.health <= 0:
+                                        self.player_units.remove(target)
+                            if chosen_attack=="Attack Volant":
+                                pass
+    
 
     def draw_health_as_hearts(self, unit, x_offset, y_offset,team):
         max_health = 100  
@@ -265,7 +373,8 @@ class Game:
 
         filled_hearts = (unit.health / max_health) * num_hearts
         full_hearts = int(filled_hearts)  
-        empty_hearts = num_hearts - full_hearts 
+        half_heart = filled_hearts - full_hearts >= 0.5
+    
         if team=="enemy":
             heart_color=GREEN
         elif team =="player":
@@ -275,8 +384,18 @@ class Game:
             heart_rect = pygame.Rect(x_offset + i * (heart_size + 5), y_offset, heart_size, heart_size)
             pygame.draw.rect(self.screen, heart_color, heart_rect)  
 
-        # Dessin des cœurs vides
-        for i in range(full_hearts, num_hearts):
+        if half_heart:
+            half_heart_rect = pygame.Rect(x_offset + full_hearts * (heart_size + 5), y_offset, heart_size // 2, heart_size)
+            pygame.draw.rect(self.screen, heart_color, half_heart_rect)  # Draw the left half
+            empty_heart_rect = pygame.Rect(
+                x_offset + full_hearts * (heart_size + 5) + heart_size // 2, 
+                y_offset, 
+                heart_size // 2, 
+                heart_size
+            )
+            pygame.draw.rect(self.screen, (100, 100, 100), empty_heart_rect)  # Draw the right half as empty
+
+        for i in range(full_hearts + (1 if half_heart else 0), num_hearts):
             heart_rect = pygame.Rect(x_offset + i * (heart_size + 5), y_offset, heart_size, heart_size)
             pygame.draw.rect(self.screen, (100, 100, 100), heart_rect) 
 
@@ -396,10 +515,19 @@ class Game:
         for grass in self.grass_blocks:
             grass.draw(self.screen)
 
+        burntgrass=GenerateBlocks(ROWS,COLUMNS,'burnt grass',self.burnt_grass)
+        burnt_blocks=burntgrass.create_burnt_grass()
+        for burnt in burnt_blocks:
+            burnt.draw(self.screen)
+
         # Affiche les bombe/trap
         for bombe in self.bombe_unit:
             bombe.draw(self.screen)
+
+        for bombe in self.bombe_enemy:
+            bombe.draw(self.screen)
         
+
 
         # Affiche les unités
         for unit in self.player_units:
