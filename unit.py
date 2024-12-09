@@ -9,18 +9,22 @@ class Position:
         self.y = y
         self.vitesse = vitesse
 
-    def move(self, dx, dy):
+    def move(self, dx, dy, wall):
         """Déplace l'unité de dx, dy si possible."""
-        #self.vitesse = self.vitesse
-        #temp = self.vitesse
-        #print(temp)
         if self.vitesse > 0:
             new_x = self.x + dx
             new_y = self.y + dy
             if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in DONOTGO:
-                self.x = new_x
-                self.y = new_y
-                self.vitesse -= 1        
+            # on controlle aussi si l'unitè se trouve sur les murs que on a construit
+                for mur in wall:
+                    if (mur.x, mur.y) != (new_x, new_y):
+                        self.x = new_x
+                        self.y = new_y
+                        self.vitesse -= 1
+                if not wall:
+                        self.x = new_x
+                        self.y = new_y
+                        self.vitesse -= 1        
 
 
 class Unit(Position):
@@ -41,7 +45,7 @@ class Unit(Position):
         return degas        
    
     # Si attack < defence enemy au moins lui font 1 dega
-    def attack1(self, target):
+    def attack1(self, target, wall):
         attack_minimum = 1
         a = self.attack_1()
         degas = max(attack_minimum, a - target.defence)
@@ -128,6 +132,18 @@ class Bombe:
             for dy in range(-1, 2):  
                 if (self.x+dx,self.y+dy)not in DONOTGO:
                     burnt_grass_list.append((self.x + dx, self.y + dy))
+
+class Mur:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+        self.is_selected = True
+
+    def draw(self, screen): 
+        if self.is_selected:
+            pygame.draw.rect(screen, BLACK, ((self.x) * CELL_SIZE,
+                (self.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
         
 

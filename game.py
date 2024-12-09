@@ -22,7 +22,7 @@ class Game:
         """
         self.screen = screen
         self.player_units = [Oiseau(3, 0, 4,"Athena", 80, 2, 5, 'player', 3, 0),
-                             Poisson(1, 0, 1,"Poseidon", 80, 8, 5, 'player', 3, 0),
+                             Poisson(1, 0, 10,"Poseidon", 80, 8, 5, 'player', 3, 0),
                              Defender(2, 0, 4,"Hecate", 80, 1, 5, 'enemy', 2, 0),
                              Assasin(4, 0, 6, "Zeus", 80, 10, 5, 'player', 1, 0)
                              ]
@@ -50,6 +50,7 @@ class Game:
         self.bombe_enemy= []
         self.burnt_grass= []
         self.traps_placed=[]
+        self.wall = []
 
     def show_attack_options(self, selected_unit,x,y):
         attack_text = [
@@ -118,7 +119,7 @@ class Game:
                             dy = 1
 
                         if selected_unit.vitesse > 0:
-                            selected_unit.move(dx, dy)
+                            selected_unit.move(dx, dy, self.wall)
                             self.flip_display()
 
                     #ATTAQUES
@@ -127,7 +128,7 @@ class Game:
                             for enemy in self.enemy_units:
                                 # boucle pou attaquer tout les enemy
                                 if abs(selected_unit.x - enemy.x) <= selected_unit.distance_attack and abs(selected_unit.y - enemy.y) <= selected_unit.distance_attack:
-                                    selected_unit.attack1(enemy)
+                                    selected_unit.attack1(enemy, self.wall)
                                     if enemy.health <= 0:
                                         self.enemy_units.remove(enemy)
                             #changer l'unité apre l'attaque
@@ -136,20 +137,43 @@ class Game:
 
                         # attaque "s" (Hecate -> defene +2)                                         
                         elif event.key == pygame.K_s:
-                            selected_unit.attack2()
-                            has_acted = True
-                            selected_unit.is_selected = False
+                            if selected_unit.nom == "Hecate":
+                                selected_unit.attack2()
+                                has_acted = True
+                                selected_unit.is_selected = False
+                            else:
+                                has_acted = False
 
                         # attaque "d" (Hecate -> health +5 allies)
                         elif event.key == pygame.K_d:
-                            # boucle pour tous les allies...
-                            for unit in (self.player_units):
-                                # ...sauf lui
-                                if unit != selected_unit:
-                                    if abs(selected_unit.x - unit.x) <= selected_unit.distance_attack and abs(selected_unit.y - unit.y) <= selected_unit.distance_attack:
-                                        selected_unit.attack3(unit)  
-                            has_acted = True
-                            selected_unit.is_selected = False
+                            if selected_unit.nom == "Athena":
+                                # lititation a 4 fois
+                                if len (self.wall) <= 3:
+                                    new_wall = Mur(selected_unit.x, selected_unit.y)
+                                    self.wall.append(new_wall)
+                                    has_acted = True
+                                    selected_unit.is_selected = False 
+                                else:
+                                    has_acted = False 
+                            if selected_unit.nom == "Poseidon":
+                                if len (self.player_units) <= 6:
+                                    new_shark = Shark(selected_unit.x +1, selected_unit.y + 1, 6, "Shark", 10, 15, 5, 'player', 1, 0)
+                                    self.player_units.append(new_shark)
+                                    self.initial_speed.append(new_shark.vitesse)
+                                    #selected_unit.vitesse = self.initial_speed[i]
+                                    has_acted = True
+                                    selected_unit.is_selected = False
+                                else:
+                                    has_acted = False
+                            # boucle pour tous les allies... 
+                            if selected_unit.nom == "Hecate":
+                                for unit in (self.player_units):
+                                    # ...sauf lui
+                                    if unit != selected_unit:
+                                        if abs(selected_unit.x - unit.x) <= selected_unit.distance_attack and abs(selected_unit.y - unit.y) <= selected_unit.distance_attack:
+                                            selected_unit.attack3(unit)  
+                                    has_acted = True
+                                    selected_unit.is_selected = False
 
                         # attque "f" (Athena, Zeus -> attaque siblé)
                         elif event.key == pygame.K_f:
@@ -213,11 +237,11 @@ class Game:
                                         if abs(enemy.x - bombe_unit.x) <= bombe_unit.distance_attack and abs(enemy.y - bombe_unit.y) <= bombe_unit.distance_attack: 
                                             bombe_unit.attack_bombe(enemy,self.enemy_units)
                                             bombe_unit.bombe_affected_zone(self.burnt_grass)
-                                        self.bombe_unit.remove(bombe_unit)  # Rimuove correttamente la bomba dalla lista
+                                        self.bombe_unit.remove(bombe_unit)  
                                         self.flip_display()
                                         return 
                                     if not enemy:
-                                            self.bombe_unit.remove(bombe_unit)  # Rimuove correttamente la bomba dalla lista
+                                            self.bombe_unit.remove(bombe_unit) 
                                             self.flip_display()
                                             return
                                     
@@ -228,7 +252,7 @@ class Game:
                                         if enemy.x == bombe_unit.x and enemy.y == bombe_unit.y:
                                             bombe_unit.attack_bombe(enemy,self.enemy_units)
                                             bombe_unit.bombe_affected_zone(self.burnt_grass)
-                                            self.bombe_unit.remove(bombe_unit)#bombe_unit = None  # Rimuove la bomba dopo l'attacco
+                                            self.bombe_unit.remove(bombe_unit) #remouve la bombe apres l'attaque
                                             self.flip_display()
                                         else:
                                             self.flip_display()
@@ -299,6 +323,9 @@ class Game:
     def handle_enemy_turn(self):
         """IA très simple pour les ennemis."""
         for enemy in self.enemy_units:
+            ## j'ai essaie de remetre ici l'attaque de Zeus me ne marche pas
+            enemy.health -= enemy.additional_damage
+            self.flip_display()
             # Déplacement aléatoire
             target = random.choice(self.player_units)
             if target.nom=="Athena":
@@ -310,7 +337,7 @@ class Game:
             
             
             dx,dy=self.move_towards_target(enemy,target,move_not_possible)
-            enemy.move(dx,dy)
+            enemy.move(dx,dy, self.wall)
             print(f"{enemy.nom}:{dx,dy}")
                  
             #pendant le tour de l'enemy on controlle si il est sur la trap ou no
@@ -527,6 +554,9 @@ class Game:
         for bombe in self.bombe_enemy:
             bombe.draw(self.screen)
         
+        # affiche les murs en plus
+        for mur in self.wall:
+            mur.draw(self.screen)
 
 
         # Affiche les unités

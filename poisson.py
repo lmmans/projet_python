@@ -15,16 +15,24 @@ class Poisson(Unit):
         self.attack4_name = " Tsunami Call"
         self.attack_methodes=["Attaque Normal", "Attack Proche"]
 
-    def move(self, dx, dy):
+    def move(self, dx, dy, wall):
         """Déplace l'unité de dx, dy si possible."""
         if self.vitesse > 0 and self.team=="player":  # Vérifie si des déplacements sont possibles
             #if not self.eviter_mur():
                 new_x = self.x + dx
                 new_y = self.y + dy
                 if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in WALL:
-                    self.x = new_x
-                    self.y = new_y
-                    self.vitesse -= 1  # Réduit la vitesse après chaque mouvement
+                # on controlle aussi si l'unitè se trouve sur les murs que on a construit
+                    for mur in wall:
+                        if (mur.x, mur.y) != (new_x, new_y):
+                            self.x = new_x
+                            self.y = new_y
+                            self.vitesse -= 1
+                    if not wall:
+                        self.x = new_x
+                        self.y = new_y
+                        self.vitesse -= 1
+        # je n'ai pas fait l'integration du mur pour les enemy
         if self.team=="enemy":
             new_x = self.x + dx
             new_y = self.y + dy
@@ -41,7 +49,7 @@ class Poisson(Unit):
          degas = self.attack_power_base
          return degas
     
-    def attack1(self, target):
+    def attack1(self, target, wall):
         attack_minimum = 1
         if (self.x, self.y) not in RIVER:
             #attack_minimum = 1
@@ -53,5 +61,23 @@ class Poisson(Unit):
             degas = max(attack_minimum, attack - target.defence)
             target.health -= degas
 
-    def attack2(self):
-        pass
+    #def attack2(self):
+    #    pass
+
+class Shark(Poisson):
+    def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage):
+        Poisson.__init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage)
+        self.is_selected = False
+
+        self.attack1_name = "Shark Attack"
+        self.attack2_name = ""
+        self.attack3_name = ""
+        self.attack4_name = ""
+
+    def draw(self, screen):
+            pygame.draw.rect(screen, BLUE, ((self.x) * CELL_SIZE,
+                (self.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+            if self.is_selected:
+                pygame.draw.rect(screen, RED, ((self.x - self.distance_attack) * CELL_SIZE,
+                                (self.y - self.distance_attack)* CELL_SIZE, 
+                                CELL_SIZE*(self.distance_attack*2 + 1), CELL_SIZE*(self.distance_attack*2 + 1)), 2)
