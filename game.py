@@ -22,7 +22,7 @@ class Game:
         """
         self.screen = screen
         self.player_units = [Oiseau(3, 0, 4,"Athena", 80, 2, 5, 'player', 3, 0),
-                             Poisson(1, 0, 10,"Poseidon", 80, 8, 5, 'player', 3, 0),
+                             Poisson(1, 0, 4,"Poseidon", 80, 8, 5, 'player', 3, 0),
                              Defender(2, 0, 4,"Hecate", 80, 1, 5, 'enemy', 2, 0),
                              Assasin(4, 0, 6, "Zeus", 80, 10, 5, 'player', 1, 0)
                              ]
@@ -51,6 +51,7 @@ class Game:
         self.burnt_grass= []
         self.traps_placed=[]
         self.wall = []
+        self.tresore_on_map = []
 
     def show_attack_options(self, selected_unit,x,y):
         attack_text = [
@@ -70,7 +71,7 @@ class Game:
         #print(self.initial_speed)
         #print("coucou")
         i = 0
-        for selected_unit in self.player_units:
+        for index, selected_unit in enumerate(self.player_units):
             
             selected_unit.vitesse = self.initial_speed[i]
             #print(self.initial_speed[i])
@@ -122,15 +123,39 @@ class Game:
                             selected_unit.move(dx, dy, self.wall)
                             self.flip_display()
 
+                    # avant de commencer les attaques on regard si l'unitè est sur un tresor
+                        if len(self.tresore_on_map) >= 1:
+                            for tresore in self.tresore_on_map:
+                                if tresore.x == selected_unit.x and tresore.y == selected_unit.y:
+                                    if tresore.nom == "Vitesse":
+                                        tresore.bonus_vitesse(selected_unit)
+                                        self.initial_speed[index] = selected_unit.vitesse
+                                        self.tresore_on_map.remove(tresore)
+                                        has_acted = True
+                                        #self.initial_speed.append(new_shark.vitesse)
+                                        #self.initial_speed[i]
+                                    elif tresore.nom == "Strength":
+                                        tresore.bonus_attack(selected_unit)
+                                        self.tresore_on_map.remove(tresore)
+                                        has_acted = True
+                                    elif tresore.nom == "Distance_attack":
+                                        tresore.bonus_dist_attack(selected_unit)
+                                        self.tresore_on_map.remove(tresore)
+                                        has_acted = True
+                                    selected_unit.is_selected = False
+                                    self.flip_display()
+                                else:
+                                    has_acted = False
+
                     #ATTAQUES
                         #attaque "a" (attque multiple base pour tous)
                         if event.key == pygame.K_a:
                             for enemy in self.enemy_units:
                                 # boucle pou attaquer tout les enemy
                                 if abs(selected_unit.x - enemy.x) <= selected_unit.distance_attack and abs(selected_unit.y - enemy.y) <= selected_unit.distance_attack:
-                                    selected_unit.attack1(enemy, self.wall)
-                                    if enemy.health <= 0:
-                                        self.enemy_units.remove(enemy)
+                                    selected_unit.attack1(enemy, self.wall, self.enemy_units)
+                                    #if enemy.health <= 0:
+                                        #self.enemy_units.remove(enemy)
                             #changer l'unité apre l'attaque
                             has_acted = True
                             selected_unit.is_selected = False
@@ -141,6 +166,12 @@ class Game:
                                 selected_unit.attack2()
                                 has_acted = True
                                 selected_unit.is_selected = False
+                            elif selected_unit. nom == "Zeus":
+                                for enemy in self.enemy_units:
+                                    if abs(selected_unit.x - enemy.x) <= 1 and abs(selected_unit.y - enemy.y) <= 1:
+                                        selected_unit.attack2(enemy, self.enemy_units)
+                                        has_acted = True
+                                        selected_unit.is_selected = False
                             else:
                                 has_acted = False
 
@@ -194,7 +225,9 @@ class Game:
                             elif selected_unit.nom == "Zeus":
                                 for enemy in (self.enemy_units):
                                         if abs(selected_unit.x - enemy.x) <= selected_unit.distance_attack and abs(selected_unit.y - enemy.y) <= selected_unit.distance_attack:
-                                            selected_unit.attack4(enemy)  
+                                            selected_unit.attack4(enemy, self.enemy_units) 
+                                        #if enemy.health == 0:
+                                            #self.enemy_units.remove(enemy)  
                             has_acted = True
                             selected_unit.is_selected = False
 
@@ -325,6 +358,9 @@ class Game:
         for enemy in self.enemy_units:
             ## j'ai essaie de remetre ici l'attaque de Zeus me ne marche pas
             enemy.health -= enemy.additional_damage
+            if enemy.health <= 0:
+                self.enemy_units.remove(enemy) 
+ 
             self.flip_display()
             # Déplacement aléatoire
             target = random.choice(self.player_units)
@@ -392,6 +428,25 @@ class Game:
                             if chosen_attack=="Attack Volant":
                                 pass
     
+    def handle_tresore_turn(self):
+        if len(self.tresore_on_map) <= 6:
+            casual_choise = random.randint(0, 3)
+            position_x = random.randint(0, GRID_SIZE)
+            position_y = random.randint(0, GRID_SIZE) 
+            print(casual_choise)
+            if casual_choise == 0:
+                new_tresore = Tresore(position_x, position_y, "Vitesse")
+                self.tresore_on_map.append(new_tresore)
+                self.flip_display()
+            elif casual_choise == 1:
+                new_tresore = Tresore(position_x, position_y,"Strength")
+                self.tresore_on_map.append(new_tresore)
+                self.flip_display()
+            elif casual_choise == 2:
+                new_tresore = Tresore(position_x, position_y, "Distance_attack")
+                self.tresore_on_map.append(new_tresore)
+                self.flip_display()
+
 
     def draw_health_as_hearts(self, unit, x_offset, y_offset,team):
         max_health = 100  
@@ -553,6 +608,9 @@ class Game:
 
         for bombe in self.bombe_enemy:
             bombe.draw(self.screen)
+
+        for tresore in self.tresore_on_map:
+            tresore.draw(self.screen)
         
         # affiche les murs en plus
         for mur in self.wall:
@@ -759,6 +817,7 @@ def main():
     while True:
         game.handle_player_turn()
         game.handle_enemy_turn()
+        game.handle_tresore_turn()
 
 
 if __name__ == "__main__":

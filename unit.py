@@ -45,11 +45,13 @@ class Unit(Position):
         return degas        
    
     # Si attack < defence enemy au moins lui font 1 dega
-    def attack1(self, target, wall):
+    def attack1(self, target, wall, enemy_list):
         attack_minimum = 1
         a = self.attack_1()
         degas = max(attack_minimum, a - target.defence)
         target.health -= degas
+        if target.health <= 0:
+            enemy_list.remove(target)
         
 
     def draw(self, screen):
@@ -144,6 +146,39 @@ class Mur:
         if self.is_selected:
             pygame.draw.rect(screen, BLACK, ((self.x) * CELL_SIZE,
                 (self.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+            
+class Tresore:
+    def __init__(self, x, y, nom):
+        self.x = x
+        self.y = y
+        self.nom = nom
+        self.is_selected = True
+
+    def draw(self, screen):  
+        if self.nom == "Vitesse":
+            if self.is_selected:
+                pygame.draw.rect(screen, YELLOW, ((self.x) * CELL_SIZE,
+                (self.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+            
+        if self.nom == "Strength":
+            if self.is_selected:
+                pygame.draw.rect(screen, RED, ((self.x) * CELL_SIZE,
+                (self.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+        
+        if self.nom == "Distance_attack":
+            if self.is_selected:
+                pygame.draw.rect(screen, WHITE, ((self.x) * CELL_SIZE,
+                (self.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+    
+    def bonus_vitesse(self, target):
+        target.vitesse += 5
+        return target.vitesse
+
+    def bonus_attack(self, target):
+        target.attack_power_base +=10
+
+    def bonus_dist_attack(self, target):
+        target.distance_attack += 2
 
         
 

@@ -37,9 +37,9 @@ class Defender(Unit):
                         self.y = new_y
                         self.vitesse -= 1
                 if not wall:
-                        self.x = new_x
-                        self.y = new_y
-                        self.vitesse -= 1
+                    self.x = new_x
+                    self.y = new_y
+                    self.vitesse -= 1
         if self.team=="enemy":
             new_x = self.x + dx
             new_y = self.y + dy
@@ -48,7 +48,7 @@ class Defender(Unit):
                 self.y = new_y
 
     ###temporaire
-    def attack_normal(self):
+"""    def attack_normal(self):
         degas = self.attack_power_base
         return degas
     
@@ -62,4 +62,4 @@ class Defender(Unit):
         degas = max(attack_minimum, a - target.defence)
         target.additional_damage +=1
         #if abs(self.x - target.x) <= self.distance_attack and abs(self.y - target.y) <= self.distance_attack:
-        target.health -= degas
+        target.health -= degas"""

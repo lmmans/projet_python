@@ -23,20 +23,24 @@ class Assasin(Unit):
         degas = self.attack_power_base*7
         return degas
     
-    def attack2(self, target):
+    def attack2(self, target, enemy_list):
         attack_minimum = 1
         a = self.attack_proche()
         degas = max(attack_minimum, a - target.defence)
         #if abs(self.x - target.x) <= self.distance_attack and abs(self.y - target.y) <= self.distance_attack:
         target.health -= degas
+        if target.health <= 0:
+            enemy_list.remove(target)
 
-    def attack4(self, target):
+    def attack4(self, target, enemy_list):
         attack_minimum = 1
         a = self.attack_normal()
         degas = max(attack_minimum, a - target.defence)
-        target.additional_damage +=10
+        target.additional_damage +=50
         #if abs(self.x - target.x) <= self.distance_attack and abs(self.y - target.y) <= self.distance_attack:
         target.health -= degas 
+        if target.health <= 0:
+            enemy_list.remove(target)
 
     def move(self, dx, dy, wall):
         """Déplace l'unité de dx, dy si possible."""

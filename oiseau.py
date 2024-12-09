@@ -43,7 +43,7 @@ class Oiseau(Unit):
          degas = self.attack_power_base
          return degas
     
-    def attack1(self, target, wall):
+    def attack1(self, target, wall, enemy_list):
         attack_minimum = 1
         if (self.x, self.y) not in WALL:
             for mur in wall:
@@ -57,6 +57,8 @@ class Oiseau(Unit):
             attack = self.attack_volant()
             degas = max(attack_minimum, attack - target.defence)
             target.health -= degas
+        if target.health <= 0:
+            enemy_list.remove(target)
 
     #def attack2(self):
     #    pass
