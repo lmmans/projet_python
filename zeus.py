@@ -23,24 +23,27 @@ class Assasin(Unit):
         degas = self.attack_power_base*7
         return degas
     
-    def attack2(self, target, enemy_list):
-        attack_minimum = 1
-        a = self.attack_proche()
-        degas = max(attack_minimum, a - target.defence)
-        #if abs(self.x - target.x) <= self.distance_attack and abs(self.y - target.y) <= self.distance_attack:
-        target.health -= degas
-        if target.health <= 0:
-            enemy_list.remove(target)
+    def attack2(self, enemy_list):
+        for enemy in self.enemy_units:
+            if abs(self.x - enemy.x) <= 1 and abs(self.y - enemy.y) <= 1:
+                attack_minimum = 1
+                a = self.attack_proche()
+                degas = max(attack_minimum, a - enemy.defence)
+                #if abs(self.x - target.x) <= self.distance_attack and abs(self.y - target.y) <= self.distance_attack:
+                enemy.health -= degas
+                if enemy.health <= 0:
+                    enemy_list.remove(enemy)
 
-    def attack4(self, target, enemy_list):
-        attack_minimum = 1
-        a = self.attack_normal()
-        degas = max(attack_minimum, a - target.defence)
-        target.additional_damage +=50
-        #if abs(self.x - target.x) <= self.distance_attack and abs(self.y - target.y) <= self.distance_attack:
-        target.health -= degas 
-        if target.health <= 0:
-            enemy_list.remove(target)
+    def attack_foudre(self, enemy_list):
+        for enemy in enemy_list:
+            if abs(self.x - enemy.x) <= self.distance_attack and abs(self.y - enemy.y) <= self.distance_attack:
+                attack_minimum = 1
+                a = self.attack_normal()
+                degas = max(attack_minimum, a - enemy.defence)
+                enemy.additional_damage +=20
+                enemy.health -= degas 
+                if enemy.health <= 0:
+                    enemy_list.remove(enemy)
 
     def move(self, dx, dy, wall):
         """Déplace l'unité de dx, dy si possible."""

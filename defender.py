@@ -17,13 +17,19 @@ class Defender(Unit):
     def attack2(self): #augmentation constance de la defence prso
         self.defence = self.defence +2
 
-    def attack3(self, target):
-        target.health += 5
+    def attack3(self, player_list):
+        for unit in player_list:
+            if abs(self.x - unit.x) <= self.distance_attack and abs(self.y - unit.y) <= self.distance_attack:
+                if unit != self:
+                    unit.health += 5
 
-    def attack4(self, target):
-        target.attack_power_base += 4
+    def power_allies(self, player_list):
+        for unit in player_list:
+            if abs(self.x - unit.x) <= self.distance_attack and abs(self.y - unit.y) <= self.distance_attack:
+                if unit != self:
+                    unit.attack_power_base += 4
 
-    def move(self, dx, dy,wall):
+    def move(self, dx, dy, wall):
         """Déplace l'unité de dx, dy si possible."""
         if self.vitesse > 0 and self.team=="player":  # Vérifie si des déplacements sont possibles
                 new_x = self.x + dx
@@ -82,22 +88,3 @@ class Defender(Unit):
             new_y = self.y + dy
             if 0 <= self.x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (self.x, new_y) not in DONOTGO:
                 self.y=new_y
-
-        
-
-    ###temporaire
-"""    def attack_normal(self):
-        degas = self.attack_power_base
-        return degas
-    
-    def attack_proche(self):
-        degas = self.attack_power_base*7
-        return degas
-
-    def attack4(self, target):
-        attack_minimum = 1
-        a = self.attack_normal()
-        degas = max(attack_minimum, a - target.defence)
-        target.additional_damage +=1
-        #if abs(self.x - target.x) <= self.distance_attack and abs(self.y - target.y) <= self.distance_attack:
-        target.health -= degas"""

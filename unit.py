@@ -26,7 +26,6 @@ class Position:
                         self.y = new_y
                         self.vitesse -= 1        
 
-
 class Unit(Position):
     def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage):
         Position.__init__(self, x, y, vitesse)
@@ -40,21 +39,22 @@ class Unit(Position):
         self.additional_damage = additional_damage
         self.initial_speed= vitesse
     
-    
     def attack_1(self):
         degas = self.attack_power_base 
         return degas        
    
     # Si attack < defence enemy au moins lui font 1 dega
-    def attack1(self, target, wall, enemy_list):
-        attack_minimum = 1
-        a = self.attack_1()
-        degas = max(attack_minimum, a - target.defence)
-        target.health -= degas
-        if target.health <= 0:
-            enemy_list.remove(target)
+    def attack1(self, wall, enemy_list):
+        for enemy in enemy_list:
+        # boucle pou attaquer tout les enemy
+            if abs(self.x - enemy.x) <= self.distance_attack and abs(self.y - enemy.y) <= self.distance_attack:
+                attack_minimum = 1
+                a = self.attack_1()
+                degas = max(attack_minimum, a - enemy.defence)
+                enemy.health -= degas
+                if enemy.health <= 0:
+                    enemy_list.remove(enemy)
         
-
     def draw(self, screen):
         """Affiche l'unité sur l'écran."""
         if self.nom=="Athena":
@@ -126,16 +126,30 @@ class Bombe:
             if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE:
                 self.x = new_x
                 self.y = new_y
-            
-    
-    def attack_bombe(self, enemy,enemy_list):
-        degas = 50 
-        if enemy.x == self.x and enemy.y == self.y: # ememy sur la meme position
-            enemy.health -= degas
-        else:      # enemy entre la distance d'action 
-            enemy.health -= (degas/2)
-        if enemy.health <= 0:
-            enemy_list.remove(enemy)
+              
+    def attack_bombe(self, enemy_list, burnt_grass_list):
+        for enemy in enemy_list:
+            if abs(enemy.x - self.x) <= self.distance_attack and abs(enemy.y - self.y) <= self.distance_attack:         
+                degas = 50 
+                if enemy.x == self.x and enemy.y == self.y: # ememy sur la meme position
+                    enemy.health -= degas
+                else:      # enemy entre la distance d'action 
+                    enemy.health -= (degas/2)
+                if enemy.health <= 0:
+                    enemy_list.remove(enemy)
+        self.bombe_affected_zone(burnt_grass_list)
+
+    def attack_trap(self, enemy_list, burnt_grass_list, bombe_list): 
+        degas = 50
+        for enemy in enemy_list:
+            if enemy.x == self.x and enemy.y == self.y:         
+                enemy.health -= degas
+                self.bombe_affected_zone(burnt_grass_list)
+                bombe_list.remove(self)  
+                if enemy.health <= 0:
+                    enemy_list.remove(enemy)
+            else:
+                return
 
     def bombe_affected_zone(self, burnt_grass_list):
         for dx in range(-1, 2):  
@@ -192,5 +206,36 @@ class Tresore():
     def bonus_dist_attack(self, target):
         target.distance_attack += 2
 
-        
+    def spawn_tresore(self, tresore_on_map):
+        if len(tresore_on_map) <= 6:
+            casual_choise = random.randint(0, 15)
+            position_x = random.randint(0, GRID_SIZE)
+            position_y = random.randint(0, GRID_SIZE) 
+            print(casual_choise)
+            if casual_choise == 0:
+                new_tresore = Tresore(position_x, position_y, "Vitesse")
+                tresore_on_map.append(new_tresore)
+            elif casual_choise == 1:
+                new_tresore = Tresore(position_x, position_y,"Strength")
+                tresore_on_map.append(new_tresore)
+            elif casual_choise == 2:
+                new_tresore = Tresore(position_x, position_y, "Distance_attack")
+                tresore_on_map.append(new_tresore)
 
+    def compare_position_tresore(self, tresore_on_map, selected_unit, initial_speed, index):
+        if len(tresore_on_map) >= 1:
+            for tresore in tresore_on_map:
+                if tresore.x == selected_unit.x and tresore.y == selected_unit.y:
+                    if tresore.nom == "Vitesse":
+                        Tresore.bonus_vitesse(self,selected_unit)
+                        initial_speed[index] = selected_unit.vitesse
+
+                    elif tresore.nom == "Strength":
+                            Tresore.bonus_attack(self, selected_unit)
+                          
+                    elif tresore.nom == "Distance_attack":
+                            Tresore.bonus_dist_attack(self, selected_unit)
+
+                    tresore_on_map.remove(tresore)
+                    return True  # indique si le bonus a été appliqué
+        return False  # Pas des bonus appliqué

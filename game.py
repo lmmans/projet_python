@@ -12,14 +12,7 @@ from zeus import *
 class Game:
 
     def __init__(self, screen):
-        """
-        Construit le jeu avec la surface de la fenêtre.
 
-        Paramètres
-        ----------
-        screen : pygame.Surface
-            La surface de la fenêtre du jeu.
-        """
         self.screen = screen
         self.player_units = [Oiseau(3, 0, 4,"Athena", 80, 2, 5, 'player', 3, 0),
                              Poisson(1, 0, 4,"Poseidon", 80, 8, 5, 'player', 3, 0),
@@ -74,21 +67,10 @@ class Game:
 
     def handle_player_turn(self):
         """Tour du joueur"""
-        #print(self.initial_speed)
-        #print("coucou")
         i = 0
         for index, selected_unit in enumerate(self.player_units):
-            
             selected_unit.vitesse = self.initial_speed[i]
-            #print(self.initial_speed[i])
             i += 1
-            #print(selected_unit.vitesse)
-                ###essaier de le faire bouger 2 pas a la fois
-               # selected_unit.vitesse = 4
-            #if selected_unit.nom == "Poseidon":
-            #    selected_unit.vitesse = 3
-            #if selected_unit.nom=="Hecate":
-            #    selected_unit.vitesse=5
 
             # Tant que l'unité n'a pas terminé son tour
             has_acted = False
@@ -105,14 +87,6 @@ class Game:
 
                     # Gestion des touches du clavier
                     if event.type == pygame.KEYDOWN:
-                        """ 
-                        if selected_unit.nom=="Athena":
-                            steps=5
-                        elif selected_unit.nom=="Poseidon":
-                            steps=5
-                        else:
-                            steps=1
-                        """
 
                         # Déplacement (touches fléchées)
                         dx, dy = 0, 0
@@ -131,114 +105,81 @@ class Game:
 
                     # avant de commencer les attaques on regard si l'unitè est sur un tresor
                         if len(self.tresore_on_map) >= 1:
-                            for tresore in self.tresore_on_map:
-                                if tresore.x == selected_unit.x and tresore.y == selected_unit.y:
-                                    if tresore.nom == "Vitesse":
-                                        tresore.bonus_vitesse(selected_unit)
-                                        self.initial_speed[index] = selected_unit.vitesse
-                                        self.tresore_on_map.remove(tresore)
-                                        has_acted = True
-                                        #self.initial_speed.append(new_shark.vitesse)
-                                        #self.initial_speed[i]
-                                    elif tresore.nom == "Strength":
-                                        tresore.bonus_attack(selected_unit)
-                                        self.tresore_on_map.remove(tresore)
-                                        has_acted = True
-                                    elif tresore.nom == "Distance_attack":
-                                        tresore.bonus_dist_attack(selected_unit)
-                                        self.tresore_on_map.remove(tresore)
-                                        has_acted = True
-                                    selected_unit.is_selected = False
-                                    self.flip_display()
-                                else:
-                                    has_acted = False
-
+                            bonus_applied = Tresore.compare_position_tresore(self, self.tresore_on_map, selected_unit, self.initial_speed, index)
+                        # "bonus_applied" return True si la Trap a été touché
+                            if bonus_applied:
+                                has_acted = True
+                                selected_unit.is_selected = False
+                                self.flip_display()
+                            else:
+                                has_acted = False
                     #ATTAQUES
-                        #attaque "a" (attque multiple base pour tous)
-                        if event.key == pygame.K_a:
-                            for enemy in self.enemy_units:
-                                # boucle pou attaquer tout les enemy
-                                if abs(selected_unit.x - enemy.x) <= selected_unit.distance_attack and abs(selected_unit.y - enemy.y) <= selected_unit.distance_attack:
-                                    selected_unit.attack1(enemy, self.wall, self.enemy_units)
-                                    #if enemy.health <= 0:
-                                        #self.enemy_units.remove(enemy)
+                        #attaque "q" (attque multiple base pour tous)
+                        if event.key == pygame.K_q:
+                            selected_unit.attack1(self.wall, self.enemy_units)
                             #changer l'unité apre l'attaque
                             has_acted = True
                             selected_unit.is_selected = False
 
-                        # attaque "s" (Hecate -> defene +2)                                         
+                        # attaque "s" (Hecate -> defene +2, Zeus -> attaque distace 1)                                         
                         elif event.key == pygame.K_s:
                             if selected_unit.nom == "Hecate":
                                 selected_unit.attack2()
                                 has_acted = True
                                 selected_unit.is_selected = False
                             elif selected_unit. nom == "Zeus":
-                                for enemy in self.enemy_units:
-                                    if abs(selected_unit.x - enemy.x) <= 1 and abs(selected_unit.y - enemy.y) <= 1:
-                                        selected_unit.attack2(enemy, self.enemy_units)
-                                        has_acted = True
-                                        selected_unit.is_selected = False
+                                selected_unit.attack2(self.enemy_units)
+                                has_acted = True
+                                selected_unit.is_selected = False
                             else:
                                 has_acted = False
 
-                        # attaque "d" (Hecate -> health +5 allies)
+                        # attaque "d" (Hecate -> health +5 allies, Athena -> creation mu, Poiseidon -> creation shark)
                         elif event.key == pygame.K_d:
                             if selected_unit.nom == "Athena":
-                                # lititation a 4 fois
+                                # lititation creation mur a 4 fois
                                 if len (self.wall) <= 3:
                                     new_wall = Mur(selected_unit.x, selected_unit.y)
                                     self.wall.append(new_wall)
                                     has_acted = True
                                     selected_unit.is_selected = False 
                                 else:
-                                    has_acted = False 
+                                    has_acted = False
+
                             if selected_unit.nom == "Poseidon":
                                 if len (self.player_units) <= 6:
                                     new_shark = Shark(selected_unit.x +1, selected_unit.y + 1, 6, "Shark", 10, 15, 5, 'player', 1, 0)
                                     self.player_units.append(new_shark)
                                     self.initial_speed.append(new_shark.vitesse)
-                                    #selected_unit.vitesse = self.initial_speed[i]
                                     has_acted = True
                                     selected_unit.is_selected = False
                                 else:
                                     has_acted = False
-                            # boucle pour tous les allies... 
+                            # boucle pour tous les allies sauf lui
                             if selected_unit.nom == "Hecate":
-                                for unit in (self.player_units):
-                                    # ...sauf lui
-                                    if unit != selected_unit:
-                                        if abs(selected_unit.x - unit.x) <= selected_unit.distance_attack and abs(selected_unit.y - unit.y) <= selected_unit.distance_attack:
-                                            selected_unit.attack3(unit)  
-                                    has_acted = True
-                                    selected_unit.is_selected = False
+                                selected_unit.attack3(self.player_units)  
+                                has_acted = True
+                                selected_unit.is_selected = False
 
-                        # attque "f" (Athena, Zeus -> attaque siblé)
+                        # attque "f" (Athena, Poseidon -> bombe/trap, Hecate -> + 4 attack power, Zeus -> foudre)
                         elif event.key == pygame.K_f:
                             if selected_unit.nom == "Athena" or selected_unit.nom == "Poseidon":
                                 # creation unité dans la liste ""self.bombe_unit"
                                 new_bombe = Bombe(selected_unit.x, selected_unit.y, 2,"player")
                                 self.bombe_unit.append(new_bombe)
-                                #self.bombe_unit.draw(self.screen)
                                 self.flip_display()
                                 self.handle_bombe_turn(new_bombe,selected_unit)
                                         
                             elif selected_unit.nom == "Hecate":
-                                for unit in (self.player_units):
-                                    if unit != selected_unit:
-                                        if abs(selected_unit.x - unit.x) <= selected_unit.distance_attack and abs(selected_unit.y - unit.y) <= selected_unit.distance_attack:
-                                            selected_unit.attack4(unit)
+                                selected_unit.power_allies(self.player_units)
 
                             elif selected_unit.nom == "Zeus":
-                                for enemy in (self.enemy_units):
-                                        if abs(selected_unit.x - enemy.x) <= selected_unit.distance_attack and abs(selected_unit.y - enemy.y) <= selected_unit.distance_attack:
-                                            selected_unit.attack4(enemy, self.enemy_units) 
-                                        #if enemy.health == 0:
-                                            #self.enemy_units.remove(enemy)  
+                                selected_unit.attack_foudre(self.enemy_units) 
                             has_acted = True
                             selected_unit.is_selected = False
 
                         elif event.key == pygame.K_t:
-                            if selected_unit.nom=="Hecate":
+                            if selected_unit.nom == "Hecate":
                                 selected_unit.teleportation()
 
                                 has_acted=True
@@ -269,7 +210,7 @@ class Game:
                                 dy = 1
 
                     #appelle a la def move de la bombe
-                        if not has_acted:  # Permette di muovere solo finché non è stata fatta un'azione
+                        if not has_acted: 
                             bombe_unit.move(dx, dy)
                             self.flip_display()
 
@@ -278,38 +219,16 @@ class Game:
 
                 # Zeus -> lance la bombe, la bombe est detruit apres l'attaque
                 # aussi si la cible n'est pas touchè
-                                if selected_unit.nom == "Poseidon":
-                                    for enemy in self.enemy_units:
-                                        if abs(enemy.x - bombe_unit.x) <= bombe_unit.distance_attack and abs(enemy.y - bombe_unit.y) <= bombe_unit.distance_attack: 
-                                            bombe_unit.attack_bombe(enemy,self.enemy_units)
-                                            bombe_unit.bombe_affected_zone(self.burnt_grass)
-                                        else:
-                                            bombe_unit.bombe_affected_zone(self.burnt_grass)
-                                        self.bombe_unit.remove(bombe_unit)  
-                                        self.flip_display()
-                                        return 
-                                    
-
-                                    if not enemy:
-                                            bombe_unit.bombe_affected_zone(self.burnt_grass)
-                                            self.bombe_unit.remove(bombe_unit) 
-                                            self.flip_display()
-                                            return
-                                    
-                # Athena -> installe la bombe (trap) au sol
-                # trap detrite seulement si l'enemy la touche                    
-                                elif selected_unit.nom == "Athena":
-                                    for enemy in self.enemy_units:
-                                        if enemy.x == bombe_unit.x and enemy.y == bombe_unit.y:
-                                            bombe_unit.attack_bombe(enemy,self.enemy_units)
-                                            bombe_unit.bombe_affected_zone(self.burnt_grass)
-                                            self.bombe_unit.remove(bombe_unit) #remouve la bombe apres l'attaque
-                                            self.flip_display()
-                                        else:
-                                            self.flip_display()
-                                    return
-                                
-
+                            if selected_unit.nom == "Poseidon":
+                                bombe_unit.attack_bombe(self.enemy_units, self.burnt_grass)
+                                self.bombe_unit.remove(bombe_unit)  
+                                self.flip_display()
+                                return 
+                    
+                            elif selected_unit.nom == "Athena":
+                                bombe_unit.attack_trap(self.enemy_units, self.burnt_grass, self.bombe_unit)
+                                self.flip_display()
+                                return
 
     def move_towards_target(self,enemy, target, NOMove):
         
@@ -398,13 +317,8 @@ class Game:
             if self.bombe_unit:
             # [:] -> scansion de tous les trap et verification coordonnè avant de la detruire
                 for bombe in self.bombe_unit[:]:
-                    if enemy.x == bombe.x and enemy.y == bombe.y:
-                        bombe.attack_bombe(enemy,self.enemy_units)
-                        bombe.bombe_affected_zone(self.burnt_grass)
-                        self.bombe_unit.remove(bombe)
-                        self.flip_display()
-                    else:
-                        self.flip_display()
+                    bombe.attack_trap(self.enemy_units, self.burnt_grass, self.bombe_unit)
+                    self.flip_display()
 
             attack_methods =enemy.attack_methodes
             chosen_attack = random.choice(attack_methods)
@@ -421,7 +335,6 @@ class Game:
                     chosen_attack="Attack Proche"
                     print(target)
             """
-            
 
             if abs(enemy.x - target.x) <= enemy.distance_attack and abs(enemy.y - target.y) <= enemy.distance_attack:
                 if chosen_attack == "Attack BOMB":
@@ -454,23 +367,8 @@ class Game:
                         pass
     
     def handle_tresore_turn(self):
-        if len(self.tresore_on_map) <= 6:
-            casual_choise = random.randint(0, 3)
-            position_x = random.randint(0, GRID_SIZE)
-            position_y = random.randint(0, GRID_SIZE) 
-            print(casual_choise)
-            if casual_choise == 0:
-                new_tresore = Tresore(position_x, position_y, "Vitesse")
-                self.tresore_on_map.append(new_tresore)
-                self.flip_display()
-            elif casual_choise == 1:
-                new_tresore = Tresore(position_x, position_y,"Strength")
-                self.tresore_on_map.append(new_tresore)
-                self.flip_display()
-            elif casual_choise == 2:
-                new_tresore = Tresore(position_x, position_y, "Distance_attack")
-                self.tresore_on_map.append(new_tresore)
-                self.flip_display()
+        Tresore.spawn_tresore(self, self.tresore_on_map)
+        self.flip_display()
 
 
     def draw_health_as_hearts(self, unit, x_offset, y_offset,team):

@@ -49,19 +49,21 @@ class Poisson(Unit):
          degas = self.attack_power_base
          return degas
     
-    def attack1(self, target, wall, enemy_list):
-        attack_minimum = 1
-        if (self.x, self.y) not in RIVER:
-            #attack_minimum = 1
-            attack = self.attack_normal()
-            degas = max(attack_minimum, attack - target.defence)
-            target.health -= degas
-        elif (self.x, self.y) in RIVER: #aumentation attack temporarire
-            attack = self.attack_ocean()
-            degas = max(attack_minimum, attack - target.defence)
-            target.health -= degas
-        if target.health <= 0:
-            enemy_list.remove(target)
+    def attack1(self, wall, enemy_list): 
+        for enemy in enemy_list:
+            if abs(self.x - enemy.x) <= self.distance_attack and abs(self.y - enemy.y) <= self.distance_attack:
+                attack_minimum = 1
+                if (self.x, self.y) not in RIVER:
+                    #attack_minimum = 1
+                    attack = self.attack_normal()
+                    degas = max(attack_minimum, attack - enemy.defence)
+                    enemy.health -= degas
+                elif (self.x, self.y) in RIVER: #aumentation attack temporarire
+                    attack = self.attack_ocean()
+                    degas = max(attack_minimum, attack - enemy.defence)
+                    enemy.health -= degas
+                if enemy.health <= 0:
+                    enemy_list.remove(enemy)
 
     #def attack2(self):
     #    pass

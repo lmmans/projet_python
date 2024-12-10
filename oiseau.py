@@ -21,7 +21,6 @@ class Oiseau(Unit):
     def move(self, dx, dy,wall):
         """Déplace l'unité de dx, dy si possible."""
         if self.vitesse > 0 and self.team=="player":  # Vérifie si des déplacements sont possibles
-            #if not self.eviter_mur():
                 new_x = self.x + dx
                 new_y = self.y + dy
                 if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in RIVER:
@@ -29,7 +28,7 @@ class Oiseau(Unit):
                     self.y = new_y
                     self.vitesse -= 1  # Réduit la vitesse après chaque mouvement
                 print(f"Athena={self.vitesse}")
-        if self.team=="enemy":
+        if self.team == "enemy":
             new_x = self.x + dx
             new_y = self.y + dy
             if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in RIVER:
@@ -44,23 +43,23 @@ class Oiseau(Unit):
          degas = self.attack_power_base
          return degas
     
-    def attack1(self, target, wall, enemy_list):
-        attack_minimum = 1
-        if (self.x, self.y) not in WALL:
-            for mur in wall:
-                if (mur.x, mur.y) == (self.x, self.y):
+    def attack1(self, wall, enemy_list):
+        for enemy in enemy_list:
+            if abs(self.x - enemy.x) <= self.distance_attack and abs(self.y - enemy.y) <= self.distance_attack:
+                attack_minimum = 1
+                if (self.x, self.y) not in WALL:
+                    if wall:
+                        for mur in wall:
+                            if (mur.x, mur.y) == (self.x, self.y):
+                                attack = self.attack_volant()
+                    else:
+                            attack = self.attack_normal()
+                    degas = max(attack_minimum, attack - enemy.defence)
+                    enemy.health -= degas
+                elif (self.x, self.y) in WALL: #aumentation attack temporarire
                     attack = self.attack_volant()
-                else:
-                    attack = self.attack_normal()
-                degas = max(attack_minimum, attack - target.defence)
-                target.health -= degas
-        elif (self.x, self.y) in WALL: #aumentation attack temporarire
-            attack = self.attack_volant()
-            degas = max(attack_minimum, attack - target.defence)
-            target.health -= degas
-        if target.health <= 0:
-            enemy_list.remove(target)
-
-    #def attack2(self):
-    #    pass
+                    degas = max(attack_minimum, attack - enemy.defence)
+                    enemy.health -= degas
+                if enemy.health <= 0:
+                    enemy_list.remove(enemy)
               
