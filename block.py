@@ -17,9 +17,12 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 YELLOW=(255,255,0)
 RIVER=[(0,2),(1,2),(0,3),(1,3),(2,3),(3,3),(2,4),(3,4),(4,4),(5,4),(11,0),(11,1),(11,2),(11,3),(11,4),
-                               (10,1),(12,1),(9,2),(10,2),(12,2),(13,2),(10,3),(12,3),
-                               ]
-WALL=[(5,0),(5,1),(5,6),(5,7),(5,8),(5,9),(6,9),(7,9),(8,9),(9,9),(10,9),(0,6),(1,6),(2,6)]
+        (10,1),(12,1),(9,2),(10,2),(12,2),(13,2),(10,3),(12,3),
+        (14,14),(13,14),(12,14),(11,14),(10,14),(9,14),(14,13),(14,12),(14,11),
+        (13,13),(13,12),(12,13),(11,13),(10,13),(9,13),(8,13),
+        (12,12),(11,12),(10,12)]
+WALL=[(5,0),(5,1),(5,6),(5,7),(5,8),(5,9),(6,9),(7,9),(8,9),(9,9),(10,9),(0,6),(1,6),(2,6),
+      (0,12),(1,12),(2,12),(3,12),(4,12)]
 GRASS=[(i,j) for i in range(ROWS) for j in range(COLUMNS)]
 DONOTGO=set(RIVER+WALL) # ARRETER LES UNITES DE PARTIR DANS CES BLOCKS
 GRASSUPDATED=[x for x in GRASS if x not in DONOTGO]
@@ -59,8 +62,6 @@ class GenerateBlocks:
         self.wallcoordinates= WALL
         self.grasscoordinatesupdated=GRASSUPDATED
         self.burnt_grass=burnt_grass
-        
-
     
     def create_river(self):
         blocks = []
@@ -95,22 +96,3 @@ class GenerateBlocks:
             blocks.append(block)
         
         return blocks
-        
-    def get_attribute(self):
-        return self.all
-
-
-
-
-
-
-
-
-    
-    
-
-        
-    
-
-
-

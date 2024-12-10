@@ -23,11 +23,11 @@ class Game:
         self.screen = screen
         self.player_units = [Oiseau(3, 0, 4,"Athena", 80, 2, 5, 'player', 3, 0),
                              Poisson(1, 0, 4,"Poseidon", 80, 8, 5, 'player', 3, 0),
-                             Defender(2, 0, 4,"Hecate", 80, 1, 5, 'enemy', 2, 0),
+                             Defender(2, 0, 4,"Hecate", 80, 20, 5, 'player', 2, 0),
                              Assasin(4, 0, 6, "Zeus", 80, 10, 5, 'player', 1, 0)
                              ]
 
-        self.enemy_units = [Defender(3, 12, 4,"Hecate", 100, 8, 5, 'enemy', 1, 0),
+        self.enemy_units = [Defender(3, 11, 4,"Hecate", 100, 50, 5, 'enemy', 1, 0),
                             Assasin(13, 14, 4,"Zeus", 100, 8, 5, 'enemy', 2, 0)]
         
         self.initial_speed = [player.vitesse for player in self.player_units]
@@ -53,18 +53,24 @@ class Game:
         self.wall = []
         self.tresore_on_map = []
 
-    def show_attack_options(self, selected_unit,x,y):
-        attack_text = [
-            f"Player: {selected_unit.nom}",
-            f"A: {selected_unit.attack1_name}",
-            f"S: {selected_unit.attack2_name}",
-            f"D: {selected_unit.attack3_name}",
-            f"F: {selected_unit.attack4_name}",
+    def show_attack_options(self, selected_unit, x, y):
+        # List of potential attacks
+        attacks = [
+            ("A", selected_unit.attack1_name),
+            ("S", getattr(selected_unit, "attack2_name", None)),
+            ("D", getattr(selected_unit, "attack3_name", None)),
+            ("F", getattr(selected_unit, "attack4_name", None)),
         ]
-     
+
+        # Prepare the text to render, filtering out None or missing attacks
+        attack_text = [f"Player: {selected_unit.nom}"]
+        attack_text += [f"{key}: {name}" for key, name in attacks if name is not None]
+
+        # Render the text
         for i, line in enumerate(attack_text):
             text_surface = self.font.render(line, True, WHITE)
             self.screen.blit(text_surface, (x, y + i * 20))
+
 
     def handle_player_turn(self):
         """Tour du joueur"""
@@ -120,7 +126,7 @@ class Game:
                             dy = 1
 
                         if selected_unit.vitesse > 0:
-                            selected_unit.move(dx, dy, self.wall)
+                            selected_unit.move(dx, dy,self.wall)
                             self.flip_display()
 
                     # avant de commencer les attaques on regard si l'unitè est sur un tresor
@@ -231,6 +237,13 @@ class Game:
                             has_acted = True
                             selected_unit.is_selected = False
 
+                        elif event.key == pygame.K_t:
+                            if selected_unit.nom=="Hecate":
+                                selected_unit.teleportation()
+
+                                has_acted=True
+                                selected_unit.is_selected= False
+
                         elif event.key == pygame.K_SPACE:
                             has_acted = True
                             selected_unit.is_selected = False
@@ -270,10 +283,15 @@ class Game:
                                         if abs(enemy.x - bombe_unit.x) <= bombe_unit.distance_attack and abs(enemy.y - bombe_unit.y) <= bombe_unit.distance_attack: 
                                             bombe_unit.attack_bombe(enemy,self.enemy_units)
                                             bombe_unit.bombe_affected_zone(self.burnt_grass)
+                                        else:
+                                            bombe_unit.bombe_affected_zone(self.burnt_grass)
                                         self.bombe_unit.remove(bombe_unit)  
                                         self.flip_display()
                                         return 
+                                    
+
                                     if not enemy:
+                                            bombe_unit.bombe_affected_zone(self.burnt_grass)
                                             self.bombe_unit.remove(bombe_unit) 
                                             self.flip_display()
                                             return
@@ -390,15 +408,20 @@ class Game:
 
             attack_methods =enemy.attack_methodes
             chosen_attack = random.choice(attack_methods)
-            print(chosen_attack)
-            print(target)
+            
             """ 
-            #POUR DEBUGGER
-            if enemy.nom== "Zeus":
-                print(chosen_attack)
-                target=self.player_units[0]
-                chosen_attack="Attack BOMB"
+            #DEBUG
+
+            print(target.nom,chosen_attack)
+            print(f"La longeur de la liste est :{len(self.player_units)}")
+            if len(self.player_units)==5:
+                print("dans la boucle")
+                if enemy.nom== "Zeus":
+                    target=self.player_units[4]
+                    chosen_attack="Attack Proche"
+                    print(target)
             """
+            
 
             if abs(enemy.x - target.x) <= enemy.distance_attack and abs(enemy.y - target.y) <= enemy.distance_attack:
                 if chosen_attack == "Attack BOMB":
@@ -416,17 +439,19 @@ class Game:
                         if self.bombe_enemy:
                             self.bombe_enemy.remove(self.bombe_enemy[-1])
                         continue  # Enemy turn ends after throwing a bomb
-                    else:
-                        if chosen_attack=="Attack Proche":
-                            if abs(enemy.x - target.x) <= 1 and abs(enemy.y - target.y) <= 1:
-                                    enemy.attack_normal()
-                            if chosen_attack=="Attack Loin":
-                                if abs(enemy.x - target.x) <= enemy.distance_attack and abs(enemy.y - target.y) <= enemy.distance_attack:
-                                    enemy.attack1(target)
-                                    if target.health <= 0:
-                                        self.player_units.remove(target)
-                            if chosen_attack=="Attack Volant":
-                                pass
+                else:
+                    if chosen_attack=="Attack Proche":
+                        if abs(enemy.x - target.x) <= 1 and abs(enemy.y - target.y) <= 1:
+                                    
+                            degas=enemy.attack_normal()
+                            target.health-=degas
+                    if chosen_attack=="Attack Loin":
+                        if abs(enemy.x - target.x) <= enemy.distance_attack and abs(enemy.y - target.y) <= enemy.distance_attack:
+                            enemy.attack1(target, WALL, self.player_units)
+                            if target.health <= 0:
+                                self.player_units.remove(target)
+                    if chosen_attack=="Attack Volant":
+                        pass
     
     def handle_tresore_turn(self):
         if len(self.tresore_on_map) <= 6:
@@ -525,30 +550,45 @@ class Game:
                 zones = 2
                 square_ranges = [(5, 14, 0, 9), (11, 14, 0, 14)]
 
-            elif 11 <= player.x <= 14 and 10 <= player.y <= 14:
-                zones = 2
-                square_ranges = [(0, 14, 9, 14), (11, 14, 0, 14)]
-
-            elif 5 <= player.x <= 10 and 10 <= player.y <= 14:
-                zones = 1
-                square_ranges = [(0, 14, 9, 14)]
-
-            elif 3 <= player.x <= 4 and 10 <= player.y <= 14:
+            elif 11 <= player.x <= 14 and 10 <= player.y <= 11:
                 zones = 3
-                square_ranges = [(0, 14, 10, 14), (3, 4, 0, 14), (0, 4, 7, 14)]
+                square_ranges = [(5, 14, 9, 14), (11, 14, 0, 14),(0,14,10,11)]
 
-            elif 0 <= player.x <= 2 and 10 <= player.y <= 14:
+            elif 11 <= player.x <= 14 and 13 <= player.y <= 14:
+                zones = 3
+                square_ranges = [(5, 14, 9, 14), (11, 14, 0, 14),(0,14,13,14)]
+
+            elif 5 <= player.x <= 10 and 10 <= player.y <= 11:
                 zones = 2
-                square_ranges = [(0, 14, 10, 14), (0, 4, 7, 14)]
+                square_ranges = [(5, 14, 9, 14),(0,14,10,11)]
+
+            elif 5<= player.x<=10 and 13 <= player.y <= 14:
+                zones=2
+                square_ranges = [(5, 14, 9, 14),(0,14,13,14)]
+
+            elif 3 <= player.x <= 4 and 10 <= player.y <= 11:
+                zones = 3
+                square_ranges = [(0, 14, 10, 11), (3, 4, 0, 11), (0, 4, 7, 11)]
+
+            elif 0 <= player.x <= 2 and 10 <= player.y <= 11:
+                zones = 2
+                square_ranges = [(0, 14, 10, 11), (0, 4, 7, 11)]
 
             elif 0 <= player.x <= 2 and 7 <= player.y <= 9:
-                zones = 2
-                square_ranges = [(0, 4, 7, 14)]
+                zones = 1
+                square_ranges = [(0, 4, 7, 11)]
 
             elif 3 <= player.x <= 4 and 7 <= player.y <= 9:
                 zones = 2
-                square_ranges = [(3, 4, 0, 14), (0, 4, 7, 14)]
+                square_ranges = [(3, 4, 0, 11), (0, 4, 7, 11)]
 
+            elif 0 <= player.x <= 4 and 13<= player.y<= 14:
+                zones=1
+                square_ranges=[(0,14,12,14)]
+
+            elif player.y==12 and 5<=player.x<=14:
+                zones=1
+                square_ranges=[(0,14,10,14)] 
             elif player.y==6 and 3<=player.x<=4:
                 zones=1
                 square_ranges = [(0, 5, 0, 14)]
@@ -619,6 +659,8 @@ class Game:
 
         # Affiche les unités
         for unit in self.player_units:
+            if unit.health<0:
+                self.player_units.remove(unit)
             unit.draw(self.screen)
 
         visible = self.is_enemy_visible()
@@ -638,20 +680,33 @@ class Game:
         y_offset = 20  
 
         for unit in self.player_units:
-            name_text = self.font.render(f"Name: {unit.nom}", True, WHITE)
-            self.screen.blit(name_text, (x_offset, y_offset)) 
-            y_offset += 30  
-            """ 
-            health_text = self.font.render(f"Health: {unit.health}", True, WHITE)
-            self.screen.blit(health_text, (x_offset, y_offset)) 
-            y_offset += 30
-            
-            attack_text = self.font.render(f"Attack: {unit.attack_power_base}", True, WHITE)
-            self.screen.blit(attack_text, (x_offset, y_offset))  
-            y_offset += 30"""
-             
-            self.draw_health_as_hearts(unit, WIDTH + 20, y_offset,"player")
-            y_offset += 40  
+            if unit.is_selected:
+                name_text = self.font.render(f"Name: {unit.nom}", True, WHITE)
+                self.screen.blit(name_text, (x_offset, y_offset)) 
+                y_offset += 30  
+
+                health_text = self.font.render(f"Health: {unit.health}", True, WHITE)
+                self.screen.blit(health_text, (x_offset, y_offset)) 
+                y_offset += 30
+                
+                attack_text = self.font.render(f"Attack: {unit.attack_power_base}", True, WHITE)
+                self.screen.blit(attack_text, (x_offset, y_offset))  
+                y_offset += 30
+
+                defense_text=self.font.render(f"Defense: {unit.defence}",True,WHITE)
+                self.screen.blit(defense_text, (x_offset, y_offset))  
+                y_offset += 30
+
+                speed_text=self.font.render(f"Speed: {unit.initial_speed}", True, WHITE)
+                self.screen.blit(speed_text, (x_offset, y_offset))  
+                y_offset += 30
+
+                speed_text=self.font.render(f"Moves Left: {unit.vitesse}", True, WHITE)
+                self.screen.blit(speed_text, (x_offset, y_offset))  
+                y_offset += 30
+                
+                self.draw_health_as_hearts(unit, WIDTH + 20, y_offset,"player")
+                y_offset += 40  
 
         for enemy in self.enemy_units:
             name_text = self.font.render(f"Name: {enemy.nom}", True, WHITE)

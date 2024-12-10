@@ -38,6 +38,7 @@ class Unit(Position):
         self.is_selected = False
         self.distance_attack = distance_attack
         self.additional_damage = additional_damage
+        self.initial_speed= vitesse
     
     
     def attack_1(self):
@@ -58,11 +59,11 @@ class Unit(Position):
         """Affiche l'unité sur l'écran."""
         if self.nom=="Athena":
             photo=pygame.image.load("ATHENA.jpeg")
-        # creation carrè distance_attaque si unité selectioné
             if self.is_selected:
                 pygame.draw.rect(screen, RED, ((self.x - self.distance_attack) * CELL_SIZE,
                                 (self.y - self.distance_attack)* CELL_SIZE, 
                                 CELL_SIZE*(self.distance_attack*2 + 1), CELL_SIZE*(self.distance_attack*2 + 1)), 2)
+        # creation carrè distance_attaque si unité selectioné
         elif self.nom=="Poseidon":
             photo=photo=pygame.image.load("poseidon.jpeg")
             if self.is_selected:
@@ -77,6 +78,13 @@ class Unit(Position):
                                 CELL_SIZE*(self.distance_attack*2 + 1), CELL_SIZE*(self.distance_attack*2 + 1)), 2)
         elif self.nom=="Hecate":
             photo=pygame.image.load("hecate.png")
+            if self.is_selected:
+                pygame.draw.rect(screen, RED, ((self.x - self.distance_attack) * CELL_SIZE,
+                                (self.y - self.distance_attack)* CELL_SIZE, 
+                                CELL_SIZE*(self.distance_attack*2 + 1), CELL_SIZE*(self.distance_attack*2 + 1)), 2)
+                
+        elif self.nom=="Shark":
+            photo=pygame.image.load("Shark.png")
             if self.is_selected:
                 pygame.draw.rect(screen, RED, ((self.x - self.distance_attack) * CELL_SIZE,
                                 (self.y - self.distance_attack)* CELL_SIZE, 
@@ -139,36 +147,40 @@ class Mur:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-
+        self.image=pygame.image.load("wall.png")
         self.is_selected = True
 
     def draw(self, screen): 
         if self.is_selected:
-            pygame.draw.rect(screen, BLACK, ((self.x) * CELL_SIZE,
-                (self.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+            scaled_image = pygame.transform.scale(self.image, (CELL_SIZE,CELL_SIZE))
+            screen.blit(scaled_image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
+
             
-class Tresore:
+class Tresore():
     def __init__(self, x, y, nom):
         self.x = x
         self.y = y
         self.nom = nom
         self.is_selected = True
+        self.treasure_yellow=pygame.image.load("Treasure.png")
+        self.treasure_blue=pygame.image.load("TreasureBlue.png")
+        self.treasure_blanc=pygame.image.load("TreasureBlanc.png")
 
     def draw(self, screen):  
         if self.nom == "Vitesse":
             if self.is_selected:
-                pygame.draw.rect(screen, YELLOW, ((self.x) * CELL_SIZE,
-                (self.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+                scaled_image = pygame.transform.scale(self.treasure_yellow, (CELL_SIZE,CELL_SIZE))
+                screen.blit(scaled_image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
             
         if self.nom == "Strength":
             if self.is_selected:
-                pygame.draw.rect(screen, RED, ((self.x) * CELL_SIZE,
-                (self.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+                scaled_image = pygame.transform.scale(self.treasure_blue, (CELL_SIZE,CELL_SIZE))
+                screen.blit(scaled_image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
         
         if self.nom == "Distance_attack":
             if self.is_selected:
-                pygame.draw.rect(screen, WHITE, ((self.x) * CELL_SIZE,
-                (self.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+                scaled_image = pygame.transform.scale(self.treasure_blanc, (CELL_SIZE,CELL_SIZE))
+                screen.blit(scaled_image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
     
     def bonus_vitesse(self, target):
         target.vitesse += 5

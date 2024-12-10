@@ -15,7 +15,7 @@ class Poisson(Unit):
         self.attack4_name = " Tsunami Call"
         self.attack_methodes=["Attaque Normal", "Attack Proche"]
 
-    def move(self, dx, dy, wall):
+    def move(self, dx, dy,wall):
         """Déplace l'unité de dx, dy si possible."""
         if self.vitesse > 0 and self.team=="player":  # Vérifie si des déplacements sont possibles
             #if not self.eviter_mur():
@@ -72,14 +72,6 @@ class Shark(Poisson):
         self.is_selected = False
 
         self.attack1_name = "Shark Attack"
-        self.attack2_name = ""
-        self.attack3_name = ""
-        self.attack4_name = ""
-
-    def draw(self, screen):
-            pygame.draw.rect(screen, BLUE, ((self.x) * CELL_SIZE,
-                (self.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
-            if self.is_selected:
-                pygame.draw.rect(screen, RED, ((self.x - self.distance_attack) * CELL_SIZE,
-                                (self.y - self.distance_attack)* CELL_SIZE, 
-                                CELL_SIZE*(self.distance_attack*2 + 1), CELL_SIZE*(self.distance_attack*2 + 1)), 2)
+        self.attack2_name = None
+        self.attack3_name = None
+        self.attack4_name = None
