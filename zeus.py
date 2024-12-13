@@ -10,9 +10,9 @@ class Assasin(Unit):
 
         self.attack1_name = "Earthquake"
         self.attack2_name = "Thunderbolt Sword"
-        self.attack3_name = "Lighting Attack"
-        self.attack4_name = " Storm Attack"
-        self.attack_methodes=["Attaque Normal", "Attack Proche","Attack BOMB"]
+        self.attack3_name = "Storm Teleporation"
+        self.attack4_name = " Lightning Attack"
+        self.attack_methodes=["Attack 1","Attaque Foudre","Attaque Proche","Attack Teleportation"]
         self.throw_bomb=True
 
     def attack_normal(self):
@@ -40,31 +40,65 @@ class Assasin(Unit):
                 attack_minimum = 1
                 a = self.attack_normal()
                 degas = max(attack_minimum, a - enemy.defence)
-                enemy.additional_damage +=20
+                enemy.additional_damage +=5
                 enemy.health -= degas 
                 if enemy.health <= 0:
                     enemy_list.remove(enemy)
 
-    def move(self, dx, dy, wall):
-        """Déplace l'unité de dx, dy si possible."""
-        if self.vitesse > 0 and self.team=="player":  # Vérifie si des déplacements sont possibles
-            #if not self.eviter_mur():
-            new_x = self.x + dx
-            new_y = self.y + dy
-            if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in DONOTGO:
-            # on controlle aussi si l'unitè se trouve sur les murs que on a construit
-                for mur in wall:
-                    if (mur.x, mur.y) != (new_x, new_y):
-                        self.x = new_x
-                        self.y = new_y
-                        self.vitesse -= 1
-                if not wall:
-                        self.x = new_x
-                        self.y = new_y
-                        self.vitesse -= 1
-        if self.team=="enemy":
-            new_x = self.x + dx
-            new_y = self.y + dy
-            if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in DONOTGO:
-                self.x = new_x
-                self.y = new_y
+    def teleportation(self,direction):
+            vitesse=5
+            dx, dy = 0, 0  
+            horizontal = False 
+            not_acted=True
+            if self.team=="player":
+                while not_acted:
+                    for event in pygame.event.get():
+                        if event.type == pygame.KEYDOWN:
+                            if event.key == pygame.K_LEFT:
+                                dx = -vitesse
+                                horizontal = True
+                                not_acted=False
+
+                            elif event.key == pygame.K_RIGHT:
+                                dx = vitesse
+                                horizontal = True
+                                not_acted=False
+
+                            elif event.key == pygame.K_UP:
+                                dy = -vitesse
+                                not_acted=False
+
+                            elif event.key == pygame.K_DOWN:
+                                dy = vitesse
+                                not_acted=False   
+
+            else:
+                if direction=="Up":
+                    dy=-vitesse
+                    horizontal=False
+                elif direction =="Down":
+                    dy=+vitesse
+                    horizontal=False
+                elif direction=="Right":
+                    dx=vitesse
+                    horizontal=True
+                elif direction=="Left":
+                    dx=-vitesse
+                    horizontal=True
+                
+                
+            if horizontal:
+                new_x = self.x + dx
+                while (new_x, self.y) in DONOTGO:
+                    new_x-=1
+                if 0 <= new_x < GRID_SIZE and 0 <= self.y < GRID_SIZE and (new_x, self.y) not in DONOTGO:
+                    self.x=new_x
+                    
+            else:
+                new_y = self.y + dy
+                print(new_y)
+                while (self.x, new_y) in DONOTGO:
+                    new_y-=1
+                if 0 <= self.x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (self.x, new_y) not in DONOTGO:
+                    self.y=new_y
+    

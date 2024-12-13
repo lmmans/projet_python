@@ -1,7 +1,5 @@
 import pygame
-import random
-from unit import*
-
+from abc import ABC, abstractmethod
 
 GRID_SIZE = 15
 CELL_SIZE = 40
@@ -49,49 +47,53 @@ class BLOCK:
         
         scaled_image = pygame.transform.scale(self.image, (CELL_SIZE,CELL_SIZE))
         screen.blit(scaled_image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
-        
+
+ 
 
 
-class GenerateBlocks:
-    def __init__(self, lignes, colonnes,block_type,burnt_grass=[]):
-        self.lignes = lignes
-        self.colonnes = colonnes
-        self.image = BLOCKIMAGE[block_type]
+class GenerateBlocks(ABC):
+    def __init__(self,coordinates):
+        self.coordinates=coordinates
+
+    @abstractmethod
+    def create(self,coordinatestes):
+        pass
     
-        self.rivercoordinates= RIVER
-        self.wallcoordinates= WALL
-        self.grasscoordinatesupdated=GRASSUPDATED
-        self.burnt_grass=burnt_grass
-    
-    def create_river(self):
+
+class River(GenerateBlocks):    
+    def create(self):
         blocks = []
         
-        for (colonne, ligne) in self.rivercoordinates:
+        for (colonne, ligne) in self.coordinates:
             block = BLOCK(colonne, ligne, 'river')
             blocks.append(block)
         
         return blocks
     
-    def create_wall(self):
+class Wall(GenerateBlocks):
+    def create(self):
         blocks = []
         
-        for (colonne, ligne) in self.wallcoordinates:
+        for (colonne, ligne) in self.coordinates:
             block = BLOCK(colonne, ligne, 'wall')
             blocks.append(block)
         
         return blocks
     
-    def create_grass(self):
+class Grass(GenerateBlocks):
+    def create(self):
         blocks=[]
-        for (colonne, ligne) in self.grasscoordinatesupdated:
+        for (colonne, ligne) in self.coordinates:
             block = BLOCK(colonne, ligne, 'grass')
             blocks.append(block)
         
         return blocks
     
-    def create_burnt_grass(self):
+
+class BurntGrass(GenerateBlocks): 
+    def create(self):
         blocks=[]
-        for (colonne, ligne) in self.burnt_grass:
+        for (colonne, ligne) in self.coordinates:
             block = BLOCK(colonne, ligne, 'burnt grass')
             blocks.append(block)
         

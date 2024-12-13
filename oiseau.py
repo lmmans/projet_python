@@ -12,9 +12,9 @@ class Oiseau(Unit):
         self.photo=pygame.image.load("ATHENA.jpeg")    
 
         self.attack1_name = "Wing Storm"
-        self.attack2_name = "Sword Attack"
-        self.attack3_name = "Shield"
-        self.attack4_name = " Night vision" #We'll change the name later just trying stuff for the discription
+        self.attack2_name = None
+        self.attack3_name = "Shield Building"
+        self.attack4_name = " Trap Generation"
         self.attack_methodes=["Attaque 1", "Attack Proche","Attaque Volant"]
 
 ### Donne la possibilitè de passer sur les WALL
@@ -27,7 +27,6 @@ class Oiseau(Unit):
                     self.x = new_x
                     self.y = new_y
                     self.vitesse -= 1  # Réduit la vitesse après chaque mouvement
-                print(f"Athena={self.vitesse}")
         if self.team == "enemy":
             new_x = self.x + dx
             new_y = self.y + dy
@@ -36,7 +35,7 @@ class Oiseau(Unit):
                 self.y = new_y
 
     def attack_volant(self):
-         degas = self.attack_power_base *4
+         degas = self.attack_power_base *(2.5)
          return degas
     
     def attack_normal(self):

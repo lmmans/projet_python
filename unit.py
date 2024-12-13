@@ -54,6 +54,30 @@ class Unit(Position):
                 enemy.health -= degas
                 if enemy.health <= 0:
                     enemy_list.remove(enemy)
+
+    def move(self, dx, dy, wall):
+        """Déplace l'unité de dx, dy si possible."""
+        if self.vitesse > 0 and self.team=="player":  # Vérifie si des déplacements sont possibles
+            #if not self.eviter_mur():
+            new_x = self.x + dx
+            new_y = self.y + dy
+            if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in DONOTGO:
+            # on controlle aussi si l'unitè se trouve sur les murs que on a construit
+                for mur in wall:
+                    if (mur.x, mur.y) != (new_x, new_y):
+                        self.x = new_x
+                        self.y = new_y
+                        self.vitesse -= 1
+                if not wall:
+                        self.x = new_x
+                        self.y = new_y
+                        self.vitesse -= 1
+        if self.team=="enemy":
+            new_x = self.x + dx
+            new_y = self.y + dy
+            if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in DONOTGO:
+                self.x = new_x
+                self.y = new_y
         
     def draw(self, screen):
         """Affiche l'unité sur l'écran."""
@@ -149,7 +173,8 @@ class Bombe:
                 if enemy.health <= 0:
                     enemy_list.remove(enemy)
             else:
-                return
+                pass
+        return
 
     def bombe_affected_zone(self, burnt_grass_list):
         for dx in range(-1, 2):  
@@ -197,21 +222,20 @@ class Tresore():
                 screen.blit(scaled_image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
     
     def bonus_vitesse(self, target):
-        target.vitesse += 5
+        target.vitesse += 2
         return target.vitesse
 
     def bonus_attack(self, target):
-        target.attack_power_base +=10
+        target.attack_power_base +=3
 
     def bonus_dist_attack(self, target):
-        target.distance_attack += 2
+        target.distance_attack += 1
 
     def spawn_tresore(self, tresore_on_map):
         if len(tresore_on_map) <= 6:
             casual_choise = random.randint(0, 15)
             position_x = random.randint(0, GRID_SIZE)
             position_y = random.randint(0, GRID_SIZE) 
-            print(casual_choise)
             if casual_choise == 0:
                 new_tresore = Tresore(position_x, position_y, "Vitesse")
                 tresore_on_map.append(new_tresore)

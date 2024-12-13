@@ -1,6 +1,7 @@
 import pygame
 import random
 
+from enemy import *
 from unit import *
 from block import *
 from oiseau import *
@@ -21,21 +22,21 @@ class Game:
                              ]
 
         self.enemy_units = [Defender(3, 11, 4,"Hecate", 100, 50, 5, 'enemy', 1, 0),
-                            Assasin(13, 14, 4,"Zeus", 100, 8, 5, 'enemy', 2, 0)]
+                            Assasin(3, 10, 4,"Zeus", 100, 50, 5, 'enemy', 2, 0)]
         
         self.initial_speed = [player.vitesse for player in self.player_units]
 
         #Génération de la riviere
-        self.generateriver=GenerateBlocks(ROWS,COLUMNS,'river')
-        self.river_blocks = self.generateriver.create_river()
+        self.generateriver=River(RIVER)
+        self.river_blocks = self.generateriver.create()
 
         #Génération des murs
-        self.generatewalls=GenerateBlocks(ROWS,COLUMNS,'wall')
-        self.wall_blocks=self.generatewalls.create_wall()
+        self.generatewalls=Wall(WALL)
+        self.wall_blocks=self.generatewalls.create()
 
         #Génération de la pelouse
-        self.generategrass=GenerateBlocks(ROWS,COLUMNS,'grass')
-        self.grass_blocks=self.generategrass.create_grass()
+        self.generategrass=Grass(GRASSUPDATED)
+        self.grass_blocks=self.generategrass.create()
         
         self.font = pygame.font.SysFont('Arial', 16)
 
@@ -43,6 +44,7 @@ class Game:
         self.bombe_enemy= []
         self.burnt_grass= []
         self.traps_placed=[]
+
         self.wall = []
         self.tresore_on_map = []
 
@@ -71,8 +73,14 @@ class Game:
         for index, selected_unit in enumerate(self.player_units):
             selected_unit.vitesse = self.initial_speed[i]
             i += 1
-
+             #pendant le tour de l'enemy on controlle si il est sur la trap ou no
+            if self.bombe_enemy:
+            # [:] -> scansion de tous les trap et verification coordonnè avant de la detruire
+                for bombe in self.bombe_enemy[:]:
+                    bombe.attack_trap(self.player_units, self.burnt_grass, self.bombe_unit)
+                    self.flip_display()
             # Tant que l'unité n'a pas terminé son tour
+
             has_acted = False
             selected_unit.is_selected = True
             self.flip_display()
@@ -161,6 +169,12 @@ class Game:
                                 has_acted = True
                                 selected_unit.is_selected = False
 
+                            if selected_unit.nom == "Zeus":
+                                selected_unit.teleportation()
+
+                                has_acted=True
+                                selected_unit.is_selected= False
+
                         # attque "f" (Athena, Poseidon -> bombe/trap, Hecate -> + 4 attack power, Zeus -> foudre)
                         elif event.key == pygame.K_f:
                             if selected_unit.nom == "Athena" or selected_unit.nom == "Poseidon":
@@ -177,13 +191,6 @@ class Game:
                                 selected_unit.attack_foudre(self.enemy_units) 
                             has_acted = True
                             selected_unit.is_selected = False
-
-                        elif event.key == pygame.K_t:
-                            if selected_unit.nom == "Hecate":
-                                selected_unit.teleportation()
-
-                                has_acted=True
-                                selected_unit.is_selected= False
 
                         elif event.key == pygame.K_SPACE:
                             has_acted = True
@@ -229,7 +236,7 @@ class Game:
                                 bombe_unit.attack_trap(self.enemy_units, self.burnt_grass, self.bombe_unit)
                                 self.flip_display()
                                 return
-
+    """ 
     def move_towards_target(self,enemy, target, NOMove):
         
         possible_moves = []
@@ -289,29 +296,40 @@ class Game:
         else:
             dx,dy=0
             return dx,dy
-        
+    """   
     def handle_enemy_turn(self):
         """IA très simple pour les ennemis."""
         for enemy in self.enemy_units:
             ## j'ai essaie de remetre ici l'attaque de Zeus me ne marche pas
             enemy.health -= enemy.additional_damage
-            if enemy.health <= 0:
-                self.enemy_units.remove(enemy) 
- 
-            self.flip_display()
-            # Déplacement aléatoire
-            target = random.choice(self.player_units)
-            if target.nom=="Athena":
+            
+
+            targets_in_range = [
+            player for player in self.player_units
+            if abs(enemy.x - player.x) <= enemy.distance_attack and abs(enemy.y - player.y) <= enemy.distance_attack
+            ]
+
+            if targets_in_range:
+                # If targets are in range, choose the closest one
+                target = min(
+                    targets_in_range,
+                    key=lambda player: abs(enemy.x - player.x) + abs(enemy.y - player.y)
+                )
+            else:
+                # If no targets in range, select a random target
+                target = random.choice(self.player_units)
+            
+            if enemy.nom=="Athena":
                 move_not_possible=RIVER
-            elif target.nom=="Poseidon":
+            elif enemy.nom=="Poseidon":
                 move_not_possible=WALL
             else: 
                 move_not_possible=DONOTGO
             
+            enemy_attacks=Enemy(enemy, target, move_not_possible,self.player_units,self.wall)
+            dx,dy=enemy_attacks.move_towards_target()
             
-            dx,dy=self.move_towards_target(enemy,target,move_not_possible)
-            enemy.move(dx,dy, self.wall)
-            print(f"{enemy.nom}:{dx,dy}")
+
                  
             #pendant le tour de l'enemy on controlle si il est sur la trap ou no
             if self.bombe_unit:
@@ -322,51 +340,17 @@ class Game:
 
             attack_methods =enemy.attack_methodes
             chosen_attack = random.choice(attack_methods)
-            
-            """ 
-            #DEBUG
+            if enemy.nom=="Hecate":
+                chosen_attack="Attack 1"
+            if chosen_attack!="Teleportation":
+                enemy.move(dx,dy, self.wall)
 
-            print(target.nom,chosen_attack)
-            print(f"La longeur de la liste est :{len(self.player_units)}")
-            if len(self.player_units)==5:
-                print("dans la boucle")
-                if enemy.nom== "Zeus":
-                    target=self.player_units[4]
-                    chosen_attack="Attack Proche"
-                    print(target)
-            """
 
-            if abs(enemy.x - target.x) <= enemy.distance_attack and abs(enemy.y - target.y) <= enemy.distance_attack:
-                if chosen_attack == "Attack BOMB":
-                    if hasattr(enemy, "throw_bomb") and enemy.throw_bomb:
-                            # Decide target location for the bomb (Avoid Having 100% Precision each time)
-                        bomb_target_x = random.choice([target.x + 1, target.x - 1, target.x])
-                        bomb_target_y = random.choice([target.y + 1, target.y - 1, target.y])
-                            # Place a bomb at the target location
-                        new_bomb = Bombe(bomb_target_x, bomb_target_y,enemy.distance_attack,enemy.team)
-                        new_bomb.move(bomb_target_x, bomb_target_y)
-                        new_bomb.attack_bombe(target,self.player_units)
-                        new_bomb.bombe_affected_zone(self.burnt_grass)
-                        self.bombe_enemy.append(new_bomb)
-                        self.flip_display()
-                        if self.bombe_enemy:
-                            self.bombe_enemy.remove(self.bombe_enemy[-1])
-                        continue  # Enemy turn ends after throwing a bomb
-                else:
-                    if chosen_attack=="Attack Proche":
-                        if abs(enemy.x - target.x) <= 1 and abs(enemy.y - target.y) <= 1:
-                                    
-                            degas=enemy.attack_normal()
-                            target.health-=degas
-                    if chosen_attack=="Attack Loin":
-                        if abs(enemy.x - target.x) <= enemy.distance_attack and abs(enemy.y - target.y) <= enemy.distance_attack:
-                            enemy.attack1(target, WALL, self.player_units)
-                            if target.health <= 0:
-                                self.player_units.remove(target)
-                    if chosen_attack=="Attack Volant":
-                        pass
+            enemy_attacks.attack_IA(chosen_attack,self.bombe_enemy,self.burnt_grass)
+            self.flip_display()
+            continue
     
-    def handle_tresore_turn(self):
+    def handle_tresore_turn(self): 
         Tresore.spawn_tresore(self, self.tresore_on_map)
         self.flip_display()
 
@@ -409,94 +393,72 @@ class Game:
 
         for player in self.player_units:
             if 0 <= player.x <= 2 and 0 <= player.y <= 1:
-                zones = 1
                 square_ranges = [(0, 5, 0, 6)]
 
             elif 0 <= player.x <= 2 and 2 <= player.y <= 5:
-                zones = 2
                 square_ranges = [(0, 5, 0, 6), (0, 14, 2, 5)]
 
             elif 3 <= player.x <= 4 and 2 <= player.y <= 5:
-                zones = 3
                 square_ranges = [(0, 5, 0, 6), (0, 14, 2, 5), (3, 5, 0, 14)]
 
             elif 3 <= player.x <= 4 and 0 <= player.y <= 1:
-                zones = 2
                 square_ranges = [(0, 5, 0, 6), (3, 5, 0, 14)]
 
             elif 6 <= player.x <= 10 and 0 <= player.y <= 1:
-                zones = 1
                 square_ranges = [(5, 14, 0, 9)]
 
             elif 11 <= player.x <= 14 and 0 <= player.y <= 1:
-                zones = 2
                 square_ranges = [(5, 14, 0, 9), (11, 14, 0, 14)]
 
             elif 6 <= player.x <= 10 and 2 <= player.y <= 5:
-                zones = 2
                 square_ranges = [(5, 14, 0, 9), (0, 14, 2, 5)]
 
             elif 11 <= player.x <= 14 and 2 <= player.y <= 5:
-                zones = 3
                 square_ranges = [(5, 14, 0, 9), (0, 14, 2, 5), (11, 14, 0, 14)]
 
             elif 6 <= player.x <= 10 and 6 <= player.y <= 8:
-                zones = 1
                 square_ranges = [(5, 14, 0, 9)]
 
             elif 11 <= player.x <= 14 and 6 <= player.y <= 8:
-                zones = 2
                 square_ranges = [(5, 14, 0, 9), (11, 14, 0, 14)]
 
             elif 11 <= player.x <= 14 and 10 <= player.y <= 11:
-                zones = 3
                 square_ranges = [(5, 14, 9, 14), (11, 14, 0, 14),(0,14,10,11)]
 
             elif 11 <= player.x <= 14 and 13 <= player.y <= 14:
-                zones = 3
                 square_ranges = [(5, 14, 9, 14), (11, 14, 0, 14),(0,14,13,14)]
 
             elif 5 <= player.x <= 10 and 10 <= player.y <= 11:
-                zones = 2
                 square_ranges = [(5, 14, 9, 14),(0,14,10,11)]
 
             elif 5<= player.x<=10 and 13 <= player.y <= 14:
-                zones=2
                 square_ranges = [(5, 14, 9, 14),(0,14,13,14)]
 
             elif 3 <= player.x <= 4 and 10 <= player.y <= 11:
-                zones = 3
                 square_ranges = [(0, 14, 10, 11), (3, 4, 0, 11), (0, 4, 7, 11)]
 
             elif 0 <= player.x <= 2 and 10 <= player.y <= 11:
-                zones = 2
                 square_ranges = [(0, 14, 10, 11), (0, 4, 7, 11)]
 
             elif 0 <= player.x <= 2 and 7 <= player.y <= 9:
-                zones = 1
                 square_ranges = [(0, 4, 7, 11)]
 
             elif 3 <= player.x <= 4 and 7 <= player.y <= 9:
-                zones = 2
                 square_ranges = [(3, 4, 0, 11), (0, 4, 7, 11)]
 
             elif 0 <= player.x <= 4 and 13<= player.y<= 14:
-                zones=1
                 square_ranges=[(0,14,12,14)]
 
             elif player.y==12 and 5<=player.x<=14:
-                zones=1
                 square_ranges=[(0,14,10,14)] 
+
             elif player.y==6 and 3<=player.x<=4:
-                zones=1
                 square_ranges = [(0, 5, 0, 14)]
 
             elif player.y==9 and 11<=player.y<=14:
-                zones=1
                 square_ranges = [(5, 14, 0, 14)]
 
             elif player.x==5 and 2<=player.y<=5:
-                zones=2
                 square_ranges = [(0, 14, 0, 6),(6,14,6,8)]
             
             else:
@@ -512,11 +474,55 @@ class Game:
                     visible.append(False)  # Enemy is outside all squares
 
         return visible
+    
+    def fin_jeu(self,gamestatus):
+        if gamestatus:
+            game_state="You Win"
+            Color=GREEN
+        else:
+            game_state="You Lose"
+            Color=RED
+        
+        self.screen.fill(BLACK)
+        font = pygame.font.SysFont('Optima', 72)
+        text = font.render(game_state, True, Color)
+        buttons = pygame.font.SysFont('Optima', 36)
+           
+        
+        quit_text = buttons.render("Quit", True, BLACK)
+        
+           # Buttons
+        quit_button = pygame.Rect((SCREEN_WIDTH-200)// 2 ,(HEIGHT-50) // 2, 200, 50)
+
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  
+                    if quit_button.collidepoint(event.pos):
+                        pygame.quit()
+                        exit() 
+            
+            self.screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 75))
+            pygame.draw.rect(self.screen, WHITE, quit_button)
+            self.screen.blit(quit_text, (quit_button.x + quit_button.width // 2 - quit_text.get_width() // 2, quit_button.y + 10))
+            pygame.display.flip()
+
+
 
     def flip_display(self):
         """Affiche le jeu.
         Change display of game
         """
+        if len(self.player_units)==0:
+            status=False
+            self.fin_jeu(status)
+        elif len(self.enemy_units)==0:
+            status=True
+            self.fin_jeu(status)
+
 
         # Affiche la grille
         self.screen.fill(BLACK)
@@ -535,8 +541,8 @@ class Game:
         for grass in self.grass_blocks:
             grass.draw(self.screen)
 
-        burntgrass=GenerateBlocks(ROWS,COLUMNS,'burnt grass',self.burnt_grass)
-        burnt_blocks=burntgrass.create_burnt_grass()
+        burntgrass=BurntGrass(self.burnt_grass)
+        burnt_blocks=burntgrass.create()
         for burnt in burnt_blocks:
             burnt.draw(self.screen)
 
@@ -751,6 +757,8 @@ class Game:
                     y_offset += 30
 
             pygame.display.flip()
+
+    
 
 
 def main():

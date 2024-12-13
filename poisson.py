@@ -10,9 +10,9 @@ class Poisson(Unit):
         #self.bonus_applied = False  # Flag per bonus
 
         self.attack1_name = "Water Attack"
-        self.attack2_name = "Trident attack"
-        self.attack3_name = "Water Healing"
-        self.attack4_name = " Tsunami Call"
+        self.attack2_name = None
+        self.attack3_name = "Spawn Shark"
+        self.attack4_name = " Tsunami Bomb"
         self.attack_methodes=["Attaque Normal", "Attack Proche"]
 
     def move(self, dx, dy,wall):
