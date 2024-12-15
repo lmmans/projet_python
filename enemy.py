@@ -83,7 +83,7 @@ class Enemy:
                     # Place a bomb at the target location
                     new_bomb = Bombe(bomb_target_x, bomb_target_y,self.enemy.distance_attack,self.enemy.team)
                     new_bomb.move(bomb_target_x, bomb_target_y)
-                    new_bomb.attack_bombe(self.target,self.unit_list)
+                    new_bomb.attack_bombe(self.unit_list,burnt_grass)
                     new_bomb.bombe_affected_zone(burnt_grass)
                     bombe_enemy.append(new_bomb)
 

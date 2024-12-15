@@ -24,7 +24,7 @@ class Assasin(Unit):
         return degas
     
     def attack2(self, enemy_list):
-        for enemy in self.enemy_units:
+        for enemy in enemy_list:
             if abs(self.x - enemy.x) <= 1 and abs(self.y - enemy.y) <= 1:
                 attack_minimum = 1
                 a = self.attack_proche()

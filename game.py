@@ -24,7 +24,7 @@ class Game:
         self.enemy_units = [Defender(6, 10, 3,"Hecate", 100, 50, 5, 'enemy', 1, 0),
                             Assasin(1, 10, 2,"Zeus", 100, 50, 5, 'enemy', 2, 0),
                             Oiseau(2, 9, 5,"Athena", 100, 2, 5, 'enemy', 3, 0),
-                            Poisson(4, 13, 3,"Poseidon", 100, 5, 5, 'enemy', 2, 0)]
+                            Poisson(7, 7, 3,"Poseidon", 100, 5, 5, 'enemy', 2, 0)]
         
         self.initial_speed = [player.vitesse for player in self.player_units]
 
@@ -287,6 +287,7 @@ class Game:
 
             attack_methods =enemy.attack_methodes_enemies
             chosen_attack = random.choice(attack_methods)
+            print(enemy.nom,chosen_attack)
 
             if chosen_attack!="Teleportation":
                 enemy.move(dx,dy, self.wall)
@@ -345,7 +346,7 @@ class Game:
                 square_ranges = [(0, 5, 0, 6), (0, 14, 2, 5)]
 
             elif 3 <= player.x <= 4 and 2 <= player.y <= 5:
-                square_ranges = [(0, 5, 0, 6), (0, 14, 2, 5), (3, 5, 0, 14)]
+                square_ranges = [(0, 5, 0, 6), (0, 14, 2, 5), (3, 4, 0, 10)]
 
             elif 3 <= player.x <= 4 and 0 <= player.y <= 1:
                 square_ranges = [(0, 5, 0, 6), (3, 4, 0, 11)]
@@ -547,10 +548,6 @@ class Game:
                 self.screen.blit(defense_text, (x_offset, y_offset))  
                 y_offset += 30
 
-                speed_text=self.font.render(f"Speed: {unit.initial_speed}", True, WHITE)
-                self.screen.blit(speed_text, (x_offset, y_offset))  
-                y_offset += 30
-
                 speed_text=self.font.render(f"Moves Left: {unit.vitesse}", True, WHITE)
                 self.screen.blit(speed_text, (x_offset, y_offset))  
                 y_offset += 30
@@ -566,7 +563,7 @@ class Game:
             self.draw_health_as_hearts(enemy, WIDTH + 20, y_offset,"enemy")
             y_offset += 40  
 
-            attack_window_rect = pygame.Rect(WIDTH, HEIGHT - 80, PANEL_WIDTH, 100)
+            attack_window_rect = pygame.Rect(WIDTH, HEIGHT - 120, PANEL_WIDTH, 120)
             pygame.draw.rect(self.screen, (50, 50, 50), attack_window_rect)
             pygame.draw.rect(self.screen, WHITE, attack_window_rect, 2)
 
