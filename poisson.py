@@ -62,8 +62,6 @@ class Poisson(Unit):
                 if enemy.health <= 0:
                     enemy_list.remove(enemy)
 
-    #def attack2(self):
-    #    pass
 
 class Shark(Poisson):
     def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage):

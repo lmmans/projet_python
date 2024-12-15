@@ -8,7 +8,7 @@ Vous pouvez jouer avec 4 personnages différents tous ayant différents compéte
 Déplacement des unités:
 Chaque unités à de nombre de case différents qui peut fréquenté lors d'un seul tour. Ces nombres de cases sont indiqués dans la panel qui se trouve dans le panel ainsi que le nombre de moves left à chaque tour. 
 Les différents unités peuvent fréquentés des differents cases. 
-----
+
 ----
 LES PERSONNAGES
 ----
@@ -53,3 +53,13 @@ ATTACK 2- THUNDERBOLT SWORD/ Un attque de proximité sur les ennemis qui se trou
 ATTACK 3- TELEPORTATION/ Peut se téléporter jusqu'à 5 cases dans toutes les directions. Lorsque l'attaque est activée, la direction choisie est indiquée par un événement KEYDOWN, qui détermine la direction souhaitée.
 
 ATTACK 4- LIGHTNING ATTACK/ Attaque ciblée sur un seul ennemi se trouvant dans la zone d'attaque du personnage. L'ennemi subit des dégâts supplémentaires à chaque tour en tant qu'effet secondaire de cette attaque.
+
+TREASURE
+----
+
+Objets à collectionner dans le jeu:
+TRÉSOR BLANC : Si vous ramassez le trésor blanc, vous augmenterez la portée de votre zone d'attaque.
+
+TRÉSOR JAUNE : Si vous ramassez le trésor jaune, vous augmenterez la vitesse de votre personnage.
+
+TRÉSOR BLEU : Si vous ramassez le trésor bleu, vous augmenterez la puissance de votre attaque.
