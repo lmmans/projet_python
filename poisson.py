@@ -18,7 +18,6 @@ class Poisson(Unit):
     def move(self, dx, dy,wall):
         """Déplace l'unité de dx, dy si possible."""
         if self.vitesse > 0 and self.team=="player":  # Vérifie si des déplacements sont possibles
-            #if not self.eviter_mur():
                 new_x = self.x + dx
                 new_y = self.y + dy
                 if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in WALL:
@@ -32,7 +31,6 @@ class Poisson(Unit):
                         self.x = new_x
                         self.y = new_y
                         self.vitesse -= 1
-        # je n'ai pas fait l'integration du mur pour les enemy
         if self.team=="enemy":
             new_x = self.x + dx
             new_y = self.y + dy
@@ -42,7 +40,7 @@ class Poisson(Unit):
 
 
     def attack_ocean(self):
-            degas = self.attack_power_base *4
+            degas = self.attack_power_base *2.5
             return degas
     
     def attack_normal(self):
@@ -54,7 +52,6 @@ class Poisson(Unit):
             if abs(self.x - enemy.x) <= self.distance_attack and abs(self.y - enemy.y) <= self.distance_attack:
                 attack_minimum = 1
                 if (self.x, self.y) not in RIVER:
-                    #attack_minimum = 1
                     attack = self.attack_normal()
                     degas = max(attack_minimum, attack - enemy.defence)
                     enemy.health -= degas

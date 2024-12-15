@@ -24,7 +24,7 @@ class Game:
         self.enemy_units = [Defender(6, 10, 3,"Hecate", 100, 50, 5, 'enemy', 1, 0),
                             Assasin(1, 10, 2,"Zeus", 100, 50, 5, 'enemy', 2, 0),
                             Oiseau(2, 9, 5,"Athena", 100, 2, 5, 'enemy', 3, 0),
-                            Poisson(4, 13, 3,"Poseidon", 100, 5, 1, 'enemy', 2, 0)]
+                            Poisson(4, 13, 3,"Poseidon", 100, 5, 5, 'enemy', 2, 0)]
         
         self.initial_speed = [player.vitesse for player in self.player_units]
 
@@ -53,7 +53,7 @@ class Game:
     def show_attack_options(self, selected_unit, x, y):
         # List of potential attacks
         attacks = [
-            ("A", selected_unit.attack1_name),
+            ("Q", selected_unit.attack1_name),
             ("S", getattr(selected_unit, "attack2_name", None)),
             ("D", getattr(selected_unit, "attack3_name", None)),
             ("F", getattr(selected_unit, "attack4_name", None)),
@@ -147,7 +147,8 @@ class Game:
                             else:
                                 has_acted = False
 
-                        # attaque "d" (Hecate -> health +5 allies, Athena -> creation mu, Poiseidon -> creation shark)
+                        # attaque "d" (Hecate -> health +5 allies, Athena -> creation mu,
+                        #  Poiseidon -> creation shark, Zeus -> Teleportation)
                         elif event.key == pygame.K_d:
                             if selected_unit.nom == "Athena":
                                 # lititation creation mur a 4 fois

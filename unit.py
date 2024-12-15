@@ -2,7 +2,7 @@ import pygame
 import random
 from block import *
 
-### Pour gener les mouvement ( par default personne peut aller dans les WALL et RIVER)
+# Pour gener les mouvement ( par default personne peut aller dans les WALL et RIVER)
 class Position:
     def __init__(self, x, y, vitesse):
         self.x = x
@@ -73,10 +73,11 @@ class Unit(Position):
         if self.nom=="Athena":
             photo=pygame.image.load("ATHENA.jpeg")
             if self.is_selected:
+                # creation carrè distance_attaque si unité selectioné
                 pygame.draw.rect(screen, RED, ((self.x - self.distance_attack) * CELL_SIZE,
                                 (self.y - self.distance_attack)* CELL_SIZE, 
                                 CELL_SIZE*(self.distance_attack*2 + 1), CELL_SIZE*(self.distance_attack*2 + 1)), 2)
-        # creation carrè distance_attaque si unité selectioné
+        
         elif self.nom=="Poseidon":
             photo=photo=pygame.image.load("poseidon.jpeg")
             if self.is_selected:
@@ -161,7 +162,7 @@ class Bombe:
     def attack_bombe(self, enemy_list, burnt_grass_list):
         for enemy in enemy_list:
             if abs(enemy.x - self.x) <= self.distance_attack and abs(enemy.y - self.y) <= self.distance_attack:         
-                degas = 50 
+                degas = 10 
                 if enemy.x == self.x and enemy.y == self.y: # ememy sur la meme position
                     enemy.health -= degas
                 else:      # enemy entre la distance d'action 
@@ -240,6 +241,7 @@ class Tresore():
 
     def spawn_tresore(self, tresore_on_map):
         if len(tresore_on_map) <= 6:
+        # choice aleatoire a chaque turn
             casual_choise = random.randint(0, 15)
             position_x = random.randint(0, GRID_SIZE)
             position_y = random.randint(0, GRID_SIZE) 

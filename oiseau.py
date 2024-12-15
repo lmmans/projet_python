@@ -17,7 +17,7 @@ class Oiseau(Unit):
         self.attack4_name = " Trap Generation"
         self.attack_methodes_enemies=["Attaque 1", "Génération MUR","Attack Trap"]
 
-### Donne la possibilitè de passer sur les WALL
+# Donne la possibilitè de passer sur les WALL
     def move(self, dx, dy,wall):
         """Déplace l'unité de dx, dy si possible."""
         if self.vitesse > 0 and self.team=="player":  # Vérifie si des déplacements sont possibles

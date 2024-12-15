@@ -20,7 +20,7 @@ class Assasin(Unit):
         return degas
     
     def attack_proche(self):
-        degas = self.attack_power_base*7
+        degas = self.attack_power_base*1.5
         return degas
     
     def attack2(self, enemy_list):
@@ -29,7 +29,6 @@ class Assasin(Unit):
                 attack_minimum = 1
                 a = self.attack_proche()
                 degas = max(attack_minimum, a - enemy.defence)
-                #if abs(self.x - target.x) <= self.distance_attack and abs(self.y - target.y) <= self.distance_attack:
                 enemy.health -= degas
                 if enemy.health <= 0:
                     enemy_list.remove(enemy)
@@ -40,7 +39,7 @@ class Assasin(Unit):
                 attack_minimum = 1
                 a = self.attack_normal()
                 degas = max(attack_minimum, a - enemy.defence)
-                enemy.additional_damage +=5
+                enemy.additional_damage +=5 # 5 degas a chaque turn
                 enemy.health -= degas 
                 if enemy.health <= 0:
                     enemy_list.remove(enemy)
