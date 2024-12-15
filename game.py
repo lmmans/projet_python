@@ -21,9 +21,10 @@ class Game:
                              Assasin(4, 0, 2, "Zeus", 100, 6, 1, 'player', 2, 0)
                              ]
 
-        self.enemy_units = [Defender(3, 11, 3,"Hecate", 100, 50, 5, 'enemy', 1, 0),
-                            Assasin(3, 10, 2,"Zeus", 100, 50, 5, 'enemy', 2, 0),
-                            Oiseau(3, 9, 5,"Athena", 100, 2, 5, 'enemy', 3, 0)]
+        self.enemy_units = [Defender(6, 10, 3,"Hecate", 100, 50, 5, 'enemy', 1, 0),
+                            Assasin(1, 10, 2,"Zeus", 100, 50, 5, 'enemy', 2, 0),
+                            Oiseau(2, 9, 5,"Athena", 100, 2, 5, 'enemy', 3, 0),
+                            Poisson(4, 13, 3,"Poseidon", 100, 5, 1, 'enemy', 2, 0)]
         
         self.initial_speed = [player.vitesse for player in self.player_units]
 
@@ -71,8 +72,7 @@ class Game:
     def handle_player_turn(self):
         """Tour du joueur"""
         i = 0
-        has_acted = False
-        selected_unit.is_selected = True
+
         for index, selected_unit in enumerate(self.player_units):
             selected_unit.vitesse = self.initial_speed[i]
             i += 1
@@ -85,7 +85,8 @@ class Game:
 
 
             # Tant que l'unité n'a pas terminé son tour
-
+            has_acted = False
+            selected_unit.is_selected = True
 
             self.flip_display()
             while not has_acted:
@@ -346,7 +347,7 @@ class Game:
                 square_ranges = [(0, 5, 0, 6), (0, 14, 2, 5), (3, 5, 0, 14)]
 
             elif 3 <= player.x <= 4 and 0 <= player.y <= 1:
-                square_ranges = [(0, 5, 0, 6), (3, 5, 0, 14)]
+                square_ranges = [(0, 5, 0, 6), (3, 4, 0, 11)]
 
             elif 6 <= player.x <= 10 and 0 <= player.y <= 1:
                 square_ranges = [(5, 14, 0, 9)]
@@ -564,7 +565,7 @@ class Game:
             self.draw_health_as_hearts(enemy, WIDTH + 20, y_offset,"enemy")
             y_offset += 40  
 
-            attack_window_rect = pygame.Rect(WIDTH, HEIGHT - 120, 200, 120)
+            attack_window_rect = pygame.Rect(WIDTH, HEIGHT - 80, PANEL_WIDTH, 100)
             pygame.draw.rect(self.screen, (50, 50, 50), attack_window_rect)
             pygame.draw.rect(self.screen, WHITE, attack_window_rect, 2)
 
@@ -641,10 +642,10 @@ class Game:
         
         character_size = (150, 150)  
         characters = [
-            {"image": pygame.image.load("ATHENA.jpeg"), "name": "Athena", "health": 100, "attack": 50, "defense": 30, "rect": pygame.Rect(100, 150, *character_size)},
-            {"image": pygame.image.load("poseidon.jpeg"), "name": "Poseidon", "health": 120, "attack": 40, "defense": 40, "rect": pygame.Rect(270, 150, *character_size)},
-            {"image": pygame.image.load("zeus.jpeg"), "name": "Zeus", "health": 90, "attack": 70, "defense": 20, "rect": pygame.Rect(440, 150, *character_size)},
-            {"image": pygame.image.load("hecate.png"), "name": "Hecate", "health": 90, "attack": 70, "defense": 20, "rect": pygame.Rect(610, 150, *character_size)}
+            {"image": pygame.image.load("ATHENA.jpeg"), "name": "Athena", "health": 100, "attack": 5, "defense": 1, "rect": pygame.Rect(100, 150, *character_size)},
+            {"image": pygame.image.load("poseidon.jpeg"), "name": "Poseidon", "health": 100, "attack": 5, "defense": 1, "rect": pygame.Rect(270, 150, *character_size)},
+            {"image": pygame.image.load("zeus.jpeg"), "name": "Zeus", "health": 100, "attack": 6, "defense": 1, "rect": pygame.Rect(440, 150, *character_size)},
+            {"image": pygame.image.load("hecate.png"), "name": "Hecate", "health": 100, "attack": 3, "defense": 1, "rect": pygame.Rect(610, 150, *character_size)}
         ]
         
         
@@ -660,7 +661,6 @@ class Game:
                     # Check if a character image is clicked
                     for character in characters:
                         if character["rect"].collidepoint(event.pos):
-                            # Show character info when image is clicked
                             current_character_info = character
 
                     # Check if back button is clicked
@@ -673,12 +673,12 @@ class Game:
             screen.blit(character_text,(SCREEN_WIDTH // 2 - character_text.get_width() // 2, 75))
             screen.blit(subtitle_text,(SCREEN_WIDTH // 2 - subtitle_text.get_width() // 2, 120))
             
-            # Draw the character images
+           
             for character in characters:
                 character_image = pygame.transform.scale(character["image"], character_size)
                 screen.blit(character_image, character["rect"])
 
-            # Draw the back button
+        
             pygame.draw.rect(screen, WHITE, back_button)
             screen.blit(back_text, (back_button.x + back_button.width // 2 - back_text.get_width() // 2, back_button.y + 10))
 
