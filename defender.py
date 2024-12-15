@@ -9,10 +9,10 @@ class Defender(Unit):
         Unit.__init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage)
 
         self.attack1_name = "Guardian Attack"
-        self.attack2_name = "Protector"
+        self.attack2_name = "Protector (Add defense)"
         self.attack3_name = "Curing Power"
-        self.attack4_name = "Blue Fire"
-        self.attack_methodes=["Attaque 1","Augmentation Defense","Curing Power","Augmentation Power"]
+        self.attack4_name = "Blue Fire (Add Power to Allies)"
+        self.attack_methodes_enemies=["Attaque 1","Augmentation Defense","Curing Power","Augmentation Power"]
 
     def attack2(self): #augmentation constance de la defence prso
         self.defence = self.defence +3

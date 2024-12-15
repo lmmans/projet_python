@@ -12,7 +12,7 @@ class Assasin(Unit):
         self.attack2_name = "Thunderbolt Sword"
         self.attack3_name = "Storm Teleporation"
         self.attack4_name = " Lightning Attack"
-        self.attack_methodes=["Attack 1","Attaque Foudre","Attaque Proche","Attack Teleportation"]
+        self.attack_methodes_enemies=["Attack 1","Attaque Foudre","Attaque Proche","Attack Teleportation"]
         self.throw_bomb=True
 
     def attack_normal(self):
@@ -45,7 +45,7 @@ class Assasin(Unit):
                 if enemy.health <= 0:
                     enemy_list.remove(enemy)
 
-    def teleportation(self,direction):
+    def teleportation(self,direction=''):
             vitesse=5
             dx, dy = 0, 0  
             horizontal = False 

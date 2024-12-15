@@ -13,7 +13,7 @@ class Poisson(Unit):
         self.attack2_name = None
         self.attack3_name = "Spawn Shark"
         self.attack4_name = " Tsunami Bomb"
-        self.attack_methodes=["Attaque Normal", "Attack Proche"]
+        self.attack_methodes_enemies=["Attaque 1, Attack BOMB"]
 
     def move(self, dx, dy,wall):
         """Déplace l'unité de dx, dy si possible."""

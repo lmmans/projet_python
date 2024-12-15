@@ -15,14 +15,15 @@ class Game:
     def __init__(self, screen):
 
         self.screen = screen
-        self.player_units = [Oiseau(3, 0, 4,"Athena", 80, 2, 5, 'player', 3, 0),
-                             Poisson(1, 0, 4,"Poseidon", 80, 8, 5, 'player', 3, 0),
-                             Defender(2, 0, 4,"Hecate", 80, 20, 5, 'player', 2, 0),
-                             Assasin(4, 0, 6, "Zeus", 80, 10, 5, 'player', 1, 0)
+        self.player_units = [Oiseau(3, 0, 5,"Athena", 100, 5, 1, 'player', 3, 0),
+                             Poisson(1, 0, 3,"Poseidon", 100, 5, 1, 'player', 2, 0),
+                             Defender(2, 0, 3,"Hecate", 100, 3, 2, 'player', 1, 0),
+                             Assasin(4, 0, 2, "Zeus", 100, 6, 1, 'player', 2, 0)
                              ]
 
-        self.enemy_units = [Defender(3, 11, 4,"Hecate", 100, 50, 5, 'enemy', 1, 0),
-                            Assasin(3, 10, 4,"Zeus", 100, 50, 5, 'enemy', 2, 0)]
+        self.enemy_units = [Defender(3, 11, 3,"Hecate", 100, 50, 5, 'enemy', 1, 0),
+                            Assasin(3, 10, 2,"Zeus", 100, 50, 5, 'enemy', 2, 0),
+                            Oiseau(3, 9, 5,"Athena", 100, 2, 5, 'enemy', 3, 0)]
         
         self.initial_speed = [player.vitesse for player in self.player_units]
 
@@ -66,10 +67,12 @@ class Game:
             text_surface = self.font.render(line, True, WHITE)
             self.screen.blit(text_surface, (x, y + i * 20))
 
-
+    
     def handle_player_turn(self):
         """Tour du joueur"""
         i = 0
+        has_acted = False
+        selected_unit.is_selected = True
         for index, selected_unit in enumerate(self.player_units):
             selected_unit.vitesse = self.initial_speed[i]
             i += 1
@@ -77,12 +80,13 @@ class Game:
             if self.bombe_enemy:
             # [:] -> scansion de tous les trap et verification coordonnè avant de la detruire
                 for bombe in self.bombe_enemy[:]:
-                    bombe.attack_trap(self.player_units, self.burnt_grass, self.bombe_unit)
+                    bombe.attack_trap(self.player_units, self.burnt_grass, self.bombe_enemy)
                     self.flip_display()
+
+
             # Tant que l'unité n'a pas terminé son tour
 
-            has_acted = False
-            selected_unit.is_selected = True
+
             self.flip_display()
             while not has_acted:
                 # Important: cette boucle permet de gérer les événements Pygame
@@ -156,7 +160,7 @@ class Game:
 
                             if selected_unit.nom == "Poseidon":
                                 if len (self.player_units) <= 6:
-                                    new_shark = Shark(selected_unit.x +1, selected_unit.y + 1, 6, "Shark", 10, 15, 5, 'player', 1, 0)
+                                    new_shark = Shark(selected_unit.x +1, selected_unit.y + 1, 4, "Shark", 20, 7, 1, 'player', 1, 0)
                                     self.player_units.append(new_shark)
                                     self.initial_speed.append(new_shark.vitesse)
                                     has_acted = True
@@ -195,6 +199,7 @@ class Game:
                         elif event.key == pygame.K_SPACE:
                             has_acted = True
                             selected_unit.is_selected = False
+        
 
     # le turn de la Bombe est actioné seulement si on utilise la touche "f"
     def handle_bombe_turn(self, bombe_unit, selected_unit):
@@ -236,67 +241,7 @@ class Game:
                                 bombe_unit.attack_trap(self.enemy_units, self.burnt_grass, self.bombe_unit)
                                 self.flip_display()
                                 return
-    """ 
-    def move_towards_target(self,enemy, target, NOMove):
-        
-        possible_moves = []
 
-        
-        if (enemy.x + 1, enemy.y) not in NOMove:
-            possible_moves.append((1, 0))  # Move right
-
-        
-        if (enemy.x - 1, enemy.y) not in NOMove:
-            possible_moves.append((-1, 0))  # Move left
-
-        
-        if (enemy.x, enemy.y + 1) not in NOMove:
-            possible_moves.append((0, 1))  # Move down
-
-        
-        if (enemy.x, enemy.y - 1) not in NOMove:
-            possible_moves.append((0, -1))  # Move up
-
-        
-        if (enemy.x + 1, enemy.y - 1) not in NOMove:
-            possible_moves.append((1, -1))  # Move right and up
-
-        
-        if (enemy.x + 1, enemy.y + 1) not in NOMove:
-            possible_moves.append((1, 1))  # Move right and down
-
-        
-        if (enemy.x - 1, enemy.y - 1) not in NOMove:
-            possible_moves.append((-1, -1))  # Move left and up
-
-        
-        if (enemy.x - 1, enemy.y + 1) not in NOMove:
-            possible_moves.append((-1, 1))  # Move left and down
-
-        
-        if possible_moves:
-            
-            best_moves = []
-            min_distance = float('inf')
-
-            for dx, dy in possible_moves:
-                new_x = enemy.x + dx
-                new_y = enemy.y + dy
-                distance_to_target = abs(new_x - target.x) + abs(new_y - target.y)
-
-                
-                if distance_to_target < min_distance:
-                    best_moves = [(dx, dy)]
-                    min_distance = distance_to_target
-                elif distance_to_target == min_distance:
-                    best_moves.append((dx, dy))
-
-            dx, dy = random.choice(best_moves)
-            return dx,dy
-        else:
-            dx,dy=0
-            return dx,dy
-    """   
     def handle_enemy_turn(self):
         """IA très simple pour les ennemis."""
         for enemy in self.enemy_units:
@@ -326,7 +271,7 @@ class Game:
             else: 
                 move_not_possible=DONOTGO
             
-            enemy_attacks=Enemy(enemy, target, move_not_possible,self.player_units,self.wall)
+            enemy_attacks=Enemy(enemy, target, move_not_possible,self.enemy_units,self.player_units,self.wall)
             dx,dy=enemy_attacks.move_towards_target()
             
 
@@ -338,10 +283,9 @@ class Game:
                     bombe.attack_trap(self.enemy_units, self.burnt_grass, self.bombe_unit)
                     self.flip_display()
 
-            attack_methods =enemy.attack_methodes
+            attack_methods =enemy.attack_methodes_enemies
             chosen_attack = random.choice(attack_methods)
-            if enemy.nom=="Hecate":
-                chosen_attack="Attack 1"
+
             if chosen_attack!="Teleportation":
                 enemy.move(dx,dy, self.wall)
 
@@ -616,15 +560,7 @@ class Game:
             name_text = self.font.render(f"Name: {enemy.nom}", True, WHITE)
             self.screen.blit(name_text, (x_offset, y_offset)) 
             y_offset += 30  
-            """ 
-            health_text = self.font.render(f"Health: {enemy.health}", True, WHITE)
-            self.screen.blit(health_text, (x_offset, y_offset))  
-            y_offset += 30
-            
-            attack_text = self.font.render(f"Attack Power: {enemy.attack_power_base}", True, WHITE)
-            self.screen.blit(attack_text, (x_offset, y_offset)) 
-            y_offset += 30
-            """ 
+        
             self.draw_health_as_hearts(enemy, WIDTH + 20, y_offset,"enemy")
             y_offset += 40  
 

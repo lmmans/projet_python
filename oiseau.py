@@ -15,7 +15,7 @@ class Oiseau(Unit):
         self.attack2_name = None
         self.attack3_name = "Shield Building"
         self.attack4_name = " Trap Generation"
-        self.attack_methodes=["Attaque 1", "Attack Proche","Attaque Volant"]
+        self.attack_methodes_enemies=["Attaque 1", "Génération MUR","Attack Trap"]
 
 ### Donne la possibilitè de passer sur les WALL
     def move(self, dx, dy,wall):

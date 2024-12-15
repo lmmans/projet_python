@@ -11,7 +11,7 @@ class Position:
 
     def move(self, dx, dy, wall):
         """Déplace l'unité de dx, dy si possible."""
-        if self.vitesse > 0:
+        if self.vitesse > 0 and self.team=="player":
             new_x = self.x + dx
             new_y = self.y + dy
             if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in DONOTGO:
@@ -24,7 +24,19 @@ class Position:
                 if not wall:
                         self.x = new_x
                         self.y = new_y
-                        self.vitesse -= 1        
+                        self.vitesse -= 1   
+        if self.team=="enemy":
+            new_x = self.x + dx
+            new_y = self.y + dy
+            if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in DONOTGO:
+                for mur in wall:
+                    if (mur.x, mur.y) != (new_x, new_y):
+                        self.x = new_x
+                        self.y = new_y  
+                if not wall:
+                    self.x = new_x
+                    self.y = new_y
+                            
 
 class Unit(Position):
     def __init__(self, x, y, vitesse, nom, health, attack_power_base, defence, team, distance_attack, additional_damage):
@@ -55,29 +67,6 @@ class Unit(Position):
                 if enemy.health <= 0:
                     enemy_list.remove(enemy)
 
-    def move(self, dx, dy, wall):
-        """Déplace l'unité de dx, dy si possible."""
-        if self.vitesse > 0 and self.team=="player":  # Vérifie si des déplacements sont possibles
-            #if not self.eviter_mur():
-            new_x = self.x + dx
-            new_y = self.y + dy
-            if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in DONOTGO:
-            # on controlle aussi si l'unitè se trouve sur les murs que on a construit
-                for mur in wall:
-                    if (mur.x, mur.y) != (new_x, new_y):
-                        self.x = new_x
-                        self.y = new_y
-                        self.vitesse -= 1
-                if not wall:
-                        self.x = new_x
-                        self.y = new_y
-                        self.vitesse -= 1
-        if self.team=="enemy":
-            new_x = self.x + dx
-            new_y = self.y + dy
-            if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and (new_x, new_y) not in DONOTGO:
-                self.x = new_x
-                self.y = new_y
         
     def draw(self, screen):
         """Affiche l'unité sur l'écran."""
@@ -114,8 +103,26 @@ class Unit(Position):
                                 (self.y - self.distance_attack)* CELL_SIZE, 
                                 CELL_SIZE*(self.distance_attack*2 + 1), CELL_SIZE*(self.distance_attack*2 + 1)), 2)
 
-        scaled_image = pygame.transform.scale(photo, (CELL_SIZE,CELL_SIZE))
-        screen.blit(scaled_image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
+      
+        background = pygame.Surface((CELL_SIZE, CELL_SIZE))
+
+       
+        if self.team == 'player': 
+            background.fill(RED)  
+        else:
+            background.fill(GREEN)
+
+        
+        screen.blit(background, (self.x * CELL_SIZE, self.y * CELL_SIZE))
+
+        
+        scaled_image_size = int(CELL_SIZE * 0.8)  
+        scaled_image = pygame.transform.scale(photo, (scaled_image_size, scaled_image_size))
+
+        
+        offset = (CELL_SIZE - scaled_image_size) // 2
+        screen.blit(scaled_image, (self.x * CELL_SIZE + offset, self.y * CELL_SIZE + offset))
+
 
 class Bombe:
     def __init__(self, x, y, distance_attack,team):
